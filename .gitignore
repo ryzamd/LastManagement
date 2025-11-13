@@ -1,0 +1,44 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio files
+.vs/
+*.suo
+*.user
+*.userprefs
+*.log
+*.pdb
+*.opendata
+*.tlog
+*.trx
+*.bak
+*.cache
+*.designer.cs
+
+# NuGet packages
+packages/
+*.nupkg
+.nuget/
+NuGet.Config
+
+# Resharper files
+*.resharper
+*.DotSettings
+
+# Rider files
+.idea/
+
+# Other temporary files
+Temp/
+tmp/
+
+# Log files
+*.log
+
+# Windows specific
+Thumbs.db
+Desktop.ini
+
+# macOS specific
+.DS_Store

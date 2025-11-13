@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY ["src/LastManagement.Api/LastManagement.Api.csproj", "LastManagement.Api/"]
+COPY ["src/LastManagement.Infrastructure/LastManagement.Infrastructure.csproj", "LastManagement.Infrastructure/"]
+COPY ["src/LastManagement.Application/LastManagement.Application.csproj", "LastManagement.Application/"]
+COPY ["src/LastManagement.Domain/LastManagement.Domain.csproj", "LastManagement.Domain/"]
+
+RUN dotnet restore "LastManagement.Api/LastManagement.Api.csproj"
+
+COPY src/ .
+WORKDIR "/src/LastManagement.Api"
+RUN dotnet publish "LastManagement.Api.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+EXPOSE 80
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "LastManagement.Api.dll"]
