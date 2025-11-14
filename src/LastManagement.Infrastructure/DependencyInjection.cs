@@ -1,5 +1,6 @@
 ﻿using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Features.Authentication.Interfaces;
+using LastManagement.Application.Features.Customers.Interfaces;
 using LastManagement.Infrastructure.Authentication;
 using LastManagement.Infrastructure.Options;
 using LastManagement.Infrastructure.Persistence;
@@ -29,6 +30,7 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -22,9 +22,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
+		Dockerfile.txt = Dockerfile.txt
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dockerfile", "Dockerfile", "{959370CF-5204-4F30-B247-E7E03A25F1C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,7 +118,6 @@ Global
 		{B64935CE-ECCF-4F9C-85CC-4CC7D2DE7F04} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{9150C7E0-94D2-491A-9517-7F31EA299C78} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{4D055829-C172-4B78-AF0E-57C71E826B23} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
-		{959370CF-5204-4F30-B247-E7E03A25F1C4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3B7BEB07-DE94-40BD-8DF3-9CCE89BE0B8C}

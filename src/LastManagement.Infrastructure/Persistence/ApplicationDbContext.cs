@@ -1,5 +1,6 @@
 using LastManagement.Domain.Accounts;
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Customers;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Infrastructure.Persistence;
@@ -11,6 +12,7 @@ public sealed class ApplicationDbContext : DbContext
     }
 
     public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Customer> Customers => Set<Customer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

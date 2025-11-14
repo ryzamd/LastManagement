@@ -88,9 +88,7 @@ namespace LastManagement.Infrastructure.Migrations
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(1)
                         .HasColumnName("version");
 
                     b.HasKey("Id");
@@ -107,6 +105,59 @@ namespace LastManagement.Infrastructure.Migrations
                         .HasDatabaseName("idx_accounts_username");
 
                     b.ToTable("accounts", (string)null);
+                });
+
+            modelBuilder.Entity("LastManagement.Domain.Customers.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("customer_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerName")
+                        .HasDatabaseName("idx_customers_name");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("idx_customers_status");
+
+                    b.ToTable("customers", (string)null);
                 });
 #pragma warning restore 612, 618
         }
