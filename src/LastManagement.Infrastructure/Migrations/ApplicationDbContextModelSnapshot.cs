@@ -159,6 +159,60 @@ namespace LastManagement.Infrastructure.Migrations
 
                     b.ToTable("customers", (string)null);
                 });
+
+            modelBuilder.Entity("LastManagement.Domain.Locations.Location", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("location_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("LocationCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("location_code");
+
+                    b.Property<string>("LocationName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("location_name");
+
+                    b.Property<string>("LocationType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("location_type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("idx_locations_active");
+
+                    b.HasIndex("LocationCode")
+                        .IsUnique()
+                        .HasDatabaseName("idx_locations_code");
+
+                    b.HasIndex("LocationType")
+                        .HasDatabaseName("idx_locations_type");
+
+                    b.ToTable("locations", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

@@ -3,6 +3,8 @@ using LastManagement.Application.Features.Authentication.Commands;
 using LastManagement.Application.Features.Authentication.Queries;
 using LastManagement.Application.Features.Customers.Commands;
 using LastManagement.Application.Features.Customers.Queries;
+using LastManagement.Application.Features.Locations.Commands;
+using LastManagement.Application.Features.Locations.Queries;
 
 namespace LastManagement.Api.Global.Extensions;
 
@@ -21,6 +23,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateCustomerCommandHandler>();
         services.AddScoped<UpdateCustomerCommandHandler>();
         services.AddScoped<DeleteCustomerCommandHandler>();
+        // Locations
+        services.AddScoped<GetLocationsQueryHandler>();
+        services.AddScoped<GetLocationByIdQueryHandler>();
+        services.AddScoped<CreateLocationCommandHandler>();
+        services.AddScoped<UpdateLocationCommandHandler>();
+        services.AddScoped<DeleteLocationCommandHandler>();
 
         return services;
     }
