@@ -160,6 +160,70 @@ namespace LastManagement.Infrastructure.Migrations
                     b.ToTable("customers", (string)null);
                 });
 
+            modelBuilder.Entity("LastManagement.Domain.LastSizes.LastSize", b =>
+                {
+                    b.Property<int>("SizeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("size_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SizeId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ReplacementSizeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("replacement_size_id");
+
+                    b.Property<string>("SizeLabel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("size_label");
+
+                    b.Property<decimal>("SizeValue")
+                        .HasPrecision(4, 1)
+                        .HasColumnType("numeric(4,1)")
+                        .HasColumnName("size_value");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SizeId");
+
+                    b.HasIndex("ReplacementSizeId");
+
+                    b.HasIndex("SizeValue")
+                        .IsUnique()
+                        .HasDatabaseName("idx_last_sizes_value");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("idx_last_sizes_status");
+
+                    b.ToTable("last_sizes", (string)null);
+                });
+
             modelBuilder.Entity("LastManagement.Domain.Locations.Location", b =>
                 {
                     b.Property<int>("Id")
@@ -212,6 +276,16 @@ namespace LastManagement.Infrastructure.Migrations
                         .HasDatabaseName("idx_locations_type");
 
                     b.ToTable("locations", (string)null);
+                });
+
+            modelBuilder.Entity("LastManagement.Domain.LastSizes.LastSize", b =>
+                {
+                    b.HasOne("LastManagement.Domain.LastSizes.LastSize", "ReplacementSize")
+                        .WithMany()
+                        .HasForeignKey("ReplacementSizeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ReplacementSize");
                 });
 #pragma warning restore 612, 618
         }

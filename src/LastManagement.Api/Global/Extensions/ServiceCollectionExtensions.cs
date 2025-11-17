@@ -3,6 +3,8 @@ using LastManagement.Application.Features.Authentication.Commands;
 using LastManagement.Application.Features.Authentication.Queries;
 using LastManagement.Application.Features.Customers.Commands;
 using LastManagement.Application.Features.Customers.Queries;
+using LastManagement.Application.Features.LastSizes.Commands;
+using LastManagement.Application.Features.LastSizes.Queries;
 using LastManagement.Application.Features.Locations.Commands;
 using LastManagement.Application.Features.Locations.Queries;
 
@@ -29,6 +31,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateLocationCommandHandler>();
         services.AddScoped<UpdateLocationCommandHandler>();
         services.AddScoped<DeleteLocationCommandHandler>();
+        // LastSize
+        services.AddScoped<GetLastSizesQuery>();
+        services.AddScoped<GetLastSizeByIdQuery>();
+        services.AddScoped<CreateLastSizeCommand>();
+        services.AddScoped<UpdateLastSizeCommand>();
+        services.AddScoped<DeleteLastSizeCommand>();
 
         return services;
     }

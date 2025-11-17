@@ -1,6 +1,7 @@
 ﻿using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Features.Authentication.Interfaces;
 using LastManagement.Application.Features.Customers.Interfaces;
+using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Application.Features.Locations.Interfaces;
 using LastManagement.Infrastructure.Authentication;
 using LastManagement.Infrastructure.Options;
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ILocationRepository, LocationRepository>();
+        services.AddScoped<ILastSizeRepository, LastSizeRepository>();
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
