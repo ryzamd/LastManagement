@@ -25,10 +25,7 @@ public class LastSizesController : ControllerBase
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetLastSizes(
-        [FromServices] GetLastSizesQuery query,
-        [FromQuery] int limit = 20,
-        [FromQuery] int? after = null,
+    public async Task<IActionResult> GetLastSizes([FromServices] GetLastSizesQuery query, [FromQuery] int limit = 20, [FromQuery] int? after = null,
         [FromQuery(Name = "$filter")] string? filter = null,
         CancellationToken cancellationToken = default)
     {
@@ -80,10 +77,7 @@ public class LastSizesController : ControllerBase
     /// </summary>
     [HttpGet("{id:int}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetLastSizeById(
-        int id,
-        [FromServices] GetLastSizeByIdQuery query,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetLastSizeById(int id, [FromServices] GetLastSizeByIdQuery query, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -125,10 +119,7 @@ public class LastSizesController : ControllerBase
     /// </summary>
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> CreateLastSize(
-        [FromBody] CreateLastSizeRequest request,
-        [FromServices] CreateLastSizeCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateLastSize([FromBody] CreateLastSizeRequest request, [FromServices] CreateLastSizeCommand command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -209,11 +200,7 @@ public class LastSizesController : ControllerBase
     /// </summary>
     [HttpPatch("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateLastSize(
-        int id,
-        [FromBody] UpdateLastSizeRequest request,
-        [FromServices] UpdateLastSizeCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateLastSize(int id, [FromBody] UpdateLastSizeRequest request, [FromServices] UpdateLastSizeCommand command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -302,10 +289,7 @@ public class LastSizesController : ControllerBase
     /// </summary>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteLastSize(
-        int id,
-        [FromServices] DeleteLastSizeCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DeleteLastSize(int id, [FromServices] DeleteLastSizeCommand command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -351,6 +335,156 @@ public class LastSizesController : ControllerBase
                 title = "Internal Server Error",
                 status = 500,
                 detail = "An error occurred while deleting the last size",
+                instance = HttpContext.Request.Path,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
+    }
+
+    /// <summary>
+    /// POST /api/v1/last-sizes/$batch
+    /// Create multiple sizes
+    /// </summary>
+    [HttpPost("$batch")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateBatch([FromBody] CreateLastSizeBatchRequest request, [FromServices] CreateLastSizeBatchCommand command, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
+                    );
+
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    title = "Bad Request",
+                    status = 400,
+                    detail = "One or more validation errors occurred",
+                    instance = HttpContext.Request.Path,
+                    traceId = HttpContext.TraceIdentifier,
+                    errors
+                });
+            }
+
+            var result = await command.ExecuteAsync(request, cancellationToken);
+
+            return StatusCode(207, result); // 207 Multi-Status
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating batch sizes");
+            return StatusCode(500, new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                title = "Internal Server Error",
+                status = 500,
+                detail = "An error occurred while creating batch sizes",
+                instance = HttpContext.Request.Path,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
+    }
+
+    /// <summary>
+    /// PATCH /api/v1/last-sizes/$batch
+    /// Update multiple sizes
+    /// </summary>
+    [HttpPatch("$batch")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateBatch([FromBody] UpdateLastSizeBatchRequest request, [FromServices] UpdateLastSizeBatchCommand command, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
+                    );
+
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    title = "Bad Request",
+                    status = 400,
+                    detail = "One or more validation errors occurred",
+                    instance = HttpContext.Request.Path,
+                    traceId = HttpContext.TraceIdentifier,
+                    errors
+                });
+            }
+
+            var result = await command.ExecuteAsync(request, cancellationToken);
+
+            return StatusCode(207, result); // 207 Multi-Status
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating batch sizes");
+            return StatusCode(500, new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                title = "Internal Server Error",
+                status = 500,
+                detail = "An error occurred while updating batch sizes",
+                instance = HttpContext.Request.Path,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
+    }
+
+    /// <summary>
+    /// DELETE /api/v1/last-sizes/$batch
+    /// Delete multiple sizes
+    /// </summary>
+    [HttpDelete("$batch")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteBatch([FromBody] DeleteLastSizeBatchRequest request, [FromServices] DeleteLastSizeBatchCommand command, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
+                    );
+
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    title = "Bad Request",
+                    status = 400,
+                    detail = "One or more validation errors occurred",
+                    instance = HttpContext.Request.Path,
+                    traceId = HttpContext.TraceIdentifier,
+                    errors
+                });
+            }
+
+            var result = await command.ExecuteAsync(request, cancellationToken);
+
+            return StatusCode(207, result); // 207 Multi-Status
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting batch sizes");
+            return StatusCode(500, new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                title = "Internal Server Error",
+                status = 500,
+                detail = "An error occurred while deleting batch sizes",
                 instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
