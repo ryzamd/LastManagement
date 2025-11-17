@@ -37,6 +37,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateLastSizeCommand>();
         services.AddScoped<UpdateLastSizeCommand>();
         services.AddScoped<DeleteLastSizeCommand>();
+        services.AddScoped<CreateLastSizeBatchCommand>();
+        services.AddScoped<UpdateLastSizeBatchCommand>();
+        services.AddScoped<DeleteLastSizeBatchCommand>();
 
         return services;
     }
