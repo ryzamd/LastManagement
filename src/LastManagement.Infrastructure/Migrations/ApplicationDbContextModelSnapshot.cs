@@ -160,6 +160,161 @@ namespace LastManagement.Infrastructure.Migrations
                     b.ToTable("customers", (string)null);
                 });
 
+            modelBuilder.Entity("LastManagement.Domain.InventoryStocks.InventoryMovement", b =>
+                {
+                    b.Property<int>("MovementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("movement_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MovementId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("created_by");
+
+                    b.Property<int?>("FromLocationId")
+                        .HasColumnType("integer")
+                        .HasColumnName("from_location_id");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LastId")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_id");
+
+                    b.Property<string>("MovementType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("movement_type");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("reference_number");
+
+                    b.Property<int>("SizeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_id");
+
+                    b.Property<int?>("ToLocationId")
+                        .HasColumnType("integer")
+                        .HasColumnName("to_location_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MovementId");
+
+                    b.HasIndex("ReferenceNumber")
+                        .HasDatabaseName("idx_movements_reference")
+                        .HasFilter("reference_number IS NOT NULL");
+
+                    b.HasIndex("LastId", "CreatedAt")
+                        .HasDatabaseName("idx_movements_last");
+
+                    b.HasIndex("MovementType", "CreatedAt")
+                        .HasDatabaseName("idx_movements_type");
+
+                    b.ToTable("inventory_movements", (string)null);
+                });
+
+            modelBuilder.Entity("LastManagement.Domain.InventoryStocks.InventoryStock", b =>
+                {
+                    b.Property<int>("StockId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("stock_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StockId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LastId")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_id");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("integer")
+                        .HasColumnName("location_id");
+
+                    b.Property<int>("QuantityDamaged")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("quantity_damaged");
+
+                    b.Property<int>("QuantityGood")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("quantity_good");
+
+                    b.Property<int>("QuantityReserved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("quantity_reserved");
+
+                    b.Property<int>("SizeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("version");
+
+                    b.HasKey("StockId");
+
+                    b.HasIndex("LocationId")
+                        .HasDatabaseName("idx_inventory_location");
+
+                    b.HasIndex("LastId", "SizeId")
+                        .HasDatabaseName("idx_inventory_last_size");
+
+                    b.HasIndex("LastId", "SizeId", "LocationId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_inventory_stocks_composite");
+
+                    b.ToTable("inventory_stocks", (string)null);
+                });
+
             modelBuilder.Entity("LastManagement.Domain.LastSizes.LastSize", b =>
                 {
                     b.Property<int>("SizeId")
