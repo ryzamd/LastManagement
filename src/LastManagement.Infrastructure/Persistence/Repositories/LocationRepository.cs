@@ -1,4 +1,5 @@
 using LastManagement.Application.Features.Locations.Interfaces;
+using LastManagement.Domain.InventoryStocks;
 using LastManagement.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,8 +55,7 @@ public sealed class LocationRepository : ILocationRepository
 
     public async Task<bool> HasInventoryAsync(int locationId, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement when inventory_stocks table ready
-        return await Task.FromResult(false);
+        return await _context.Set<InventoryStock>().AsNoTracking().AnyAsync(s => s.LocationId == locationId, cancellationToken);
     }
 
     public async Task AddAsync(Location location, CancellationToken cancellationToken = default)

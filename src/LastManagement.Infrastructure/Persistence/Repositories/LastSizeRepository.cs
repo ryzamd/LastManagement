@@ -1,4 +1,5 @@
 using LastManagement.Application.Features.LastSizes.Interfaces;
+using LastManagement.Domain.InventoryStocks;
 using LastManagement.Domain.LastSizes;
 using LastManagement.Domain.LastSizes.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -78,12 +79,7 @@ public class LastSizeRepository : ILastSizeRepository
 
     public async Task<bool> HasInventoryAsync(int sizeId, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement when inventory_stocks table is ready
-        // return await _context.Set<InventoryStock>()
-        //     .AsNoTracking()
-        //     .AnyAsync(s => s.SizeId == sizeId, cancellationToken);
-
-        return await Task.FromResult(false);
+        return await _context.Set<InventoryStock>().AsNoTracking().AnyAsync(s => s.SizeId == sizeId, cancellationToken);
     }
 
     public async Task AddAsync(LastSize lastSize, CancellationToken cancellationToken = default)
