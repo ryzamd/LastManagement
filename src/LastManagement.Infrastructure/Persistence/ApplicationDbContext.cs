@@ -1,6 +1,7 @@
 using LastManagement.Domain.Accounts;
 using LastManagement.Domain.Common;
 using LastManagement.Domain.Customers;
+using LastManagement.Domain.LastSizes;
 using LastManagement.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Location> Locations => Set<Location>();
+    public DbSet<LastSize> LastSizes => Set<LastSize>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
