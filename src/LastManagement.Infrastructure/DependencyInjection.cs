@@ -2,6 +2,7 @@
 using LastManagement.Application.Features.Authentication.Interfaces;
 using LastManagement.Application.Features.Customers.Interfaces;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
+using LastManagement.Application.Features.LastModels.Interfaces;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Application.Features.Locations.Interfaces;
@@ -40,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<ILastNameRepository, LastNameRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         services.AddScoped<IInventoryStockRepository, InventoryStockRepository>();
+        services.AddScoped<ILastModelRepository, LastModelRepository>();
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

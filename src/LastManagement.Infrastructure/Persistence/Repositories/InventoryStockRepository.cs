@@ -15,7 +15,7 @@ public class InventoryStockRepository : IInventoryStockRepository
 
     public async Task<InventoryStock?> GetByIdAsync(int stockId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<InventoryStock>()
+        return await _context.InventoryStocksRepository
             .FirstOrDefaultAsync(s => s.StockId == stockId, cancellationToken);
     }
 
@@ -23,7 +23,7 @@ public class InventoryStockRepository : IInventoryStockRepository
         int lastId, int sizeId, int locationId,
         CancellationToken cancellationToken = default)
     {
-        return await _context.Set<InventoryStock>()
+        return await _context.InventoryStocksRepository
             .FirstOrDefaultAsync(s =>
                 s.LastId == lastId &&
                 s.SizeId == sizeId &&
@@ -33,7 +33,7 @@ public class InventoryStockRepository : IInventoryStockRepository
 
     public async Task<(IEnumerable<InventoryStock> Items, int TotalCount)> GetPagedAsync(int? lastId, int? sizeId, int? locationId, string? cursor, int limit, CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<InventoryStock>()
+        var query = _context.InventoryStocksRepository
             .AsNoTracking()
             .AsQueryable();
         // REMOVE: .Include(s => s.Last).Include(s => s.Size).Include(s => s.Location)
@@ -69,7 +69,7 @@ public class InventoryStockRepository : IInventoryStockRepository
     public async Task<bool> ExistsAsync(int lastId, int sizeId, int locationId,
         CancellationToken cancellationToken = default)
     {
-        return await _context.Set<InventoryStock>()
+        return await _context.InventoryStocksRepository
             .AsNoTracking()
             .AnyAsync(s =>
                 s.LastId == lastId &&
@@ -80,7 +80,7 @@ public class InventoryStockRepository : IInventoryStockRepository
 
     public async Task AddAsync(InventoryStock stock, CancellationToken cancellationToken = default)
     {
-        await _context.Set<InventoryStock>().AddAsync(stock, cancellationToken);
+        await _context.InventoryStocksRepository.AddAsync(stock, cancellationToken);
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)

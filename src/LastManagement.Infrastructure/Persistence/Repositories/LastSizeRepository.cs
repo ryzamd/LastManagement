@@ -17,13 +17,13 @@ public class LastSizeRepository : ILastSizeRepository
 
     public async Task<LastSize?> GetByIdAsync(int sizeId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<LastSize>()
+        return await _context.LastSizesRepository
             .FirstOrDefaultAsync(ls => ls.SizeId == sizeId, cancellationToken);
     }
 
     public async Task<LastSize?> GetByValueAsync(decimal sizeValue, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<LastSize>()
+        return await _context.LastSizesRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(ls => ls.SizeValue == sizeValue, cancellationToken);
     }
@@ -34,7 +34,7 @@ public class LastSizeRepository : ILastSizeRepository
         SizeStatus? statusFilter,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<LastSize>().AsNoTracking();
+        var query = _context.LastSizesRepository.AsNoTracking();
 
         // Apply status filter
         if (statusFilter.HasValue)
@@ -45,7 +45,7 @@ public class LastSizeRepository : ILastSizeRepository
         // Apply cursor pagination
         if (afterId.HasValue)
         {
-            var afterSize = await _context.Set<LastSize>()
+            var afterSize = await _context.LastSizesRepository
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ls => ls.SizeId == afterId.Value, cancellationToken);
 
@@ -72,7 +72,7 @@ public class LastSizeRepository : ILastSizeRepository
 
     public async Task<bool> ExistsAsync(decimal sizeValue, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<LastSize>()
+        return await _context.LastSizesRepository
             .AsNoTracking()
             .AnyAsync(ls => ls.SizeValue == sizeValue, cancellationToken);
     }
@@ -84,19 +84,19 @@ public class LastSizeRepository : ILastSizeRepository
 
     public async Task AddAsync(LastSize lastSize, CancellationToken cancellationToken = default)
     {
-        await _context.Set<LastSize>().AddAsync(lastSize, cancellationToken);
+        await _context.LastSizesRepository.AddAsync(lastSize, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(LastSize lastSize, CancellationToken cancellationToken = default)
     {
-        _context.Set<LastSize>().Update(lastSize);
+        _context.LastSizesRepository.Update(lastSize);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(LastSize lastSize, CancellationToken cancellationToken = default)
     {
-        _context.Set<LastSize>().Remove(lastSize);
+        _context.LastSizesRepository.Remove(lastSize);
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

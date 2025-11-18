@@ -7,6 +7,7 @@ using LastManagement.Application.Features.Customers.Queries;
 using LastManagement.Application.Features.InventoryStocks.Commands;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
 using LastManagement.Application.Features.InventoryStocks.Queries;
+using LastManagement.Application.Features.LastModels.Queries;
 using LastManagement.Application.Features.LastNames.Commands;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastNames.Queries;
@@ -63,6 +64,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<UpdateLastNameBatchCommand>();
         services.AddScoped<GetLastNamesQuery>();
         services.AddScoped<GetLastNameByIdQuery>();
+        // LastModels
+        services.AddScoped<GetLastModelsQuery>();
+        services.AddScoped<GetModelsByLastIdQuery>();
 
         return services;
     }

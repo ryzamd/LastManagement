@@ -15,17 +15,17 @@ public sealed class CustomerRepository : ICustomerRepository
 
     public async Task<Customer?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Customer>().AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return await _context.CustomersRepository.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public async Task<Customer?> GetByIdForUpdateAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Customer>().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return await _context.CustomersRepository.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public async Task<(List<Customer> Items, int TotalCount)> GetPagedAsync(int limit, int? afterId, string? filterStatus, string? orderBy, CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<Customer>().AsNoTracking();
+        var query = _context.CustomersRepository.AsNoTracking();
 
         // Filter by status
         if (!string.IsNullOrEmpty(filterStatus) && Enum.TryParse<CustomerStatus>(filterStatus, out var status))
@@ -57,7 +57,7 @@ public sealed class CustomerRepository : ICustomerRepository
 
     public async Task<bool> ExistsByNameAsync(string customerName, int? excludeId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<Customer>().AsNoTracking().Where(c => c.CustomerName == customerName);
+        var query = _context.CustomersRepository.AsNoTracking().Where(c => c.CustomerName == customerName);
 
         if (excludeId.HasValue)
         {
@@ -76,16 +76,16 @@ public sealed class CustomerRepository : ICustomerRepository
 
     public async Task AddAsync(Customer customer, CancellationToken cancellationToken = default)
     {
-        await _context.Set<Customer>().AddAsync(customer, cancellationToken);
+        await _context.CustomersRepository.AddAsync(customer, cancellationToken);
     }
 
     public void Update(Customer customer)
     {
-        _context.Set<Customer>().Update(customer);
+        _context.CustomersRepository.Update(customer);
     }
 
     public void Delete(Customer customer)
     {
-        _context.Set<Customer>().Remove(customer);
+        _context.CustomersRepository.Remove(customer);
     }
 }

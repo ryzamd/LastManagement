@@ -17,12 +17,12 @@ public class LastNameRepository : ILastNameRepository
 
     public async Task<LastName?> GetByIdAsync(int lastId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<LastName>().AsNoTracking().FirstOrDefaultAsync(ln => ln.LastId == lastId, cancellationToken);
+        return await _context.LastNameRepository.AsNoTracking().FirstOrDefaultAsync(ln => ln.LastId == lastId, cancellationToken);
     }
 
     public async Task<LastName?> GetByIdForUpdateAsync(int lastId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<LastName>().FirstOrDefaultAsync(ln => ln.LastId == lastId, cancellationToken);
+        return await _context.LastNameRepository.FirstOrDefaultAsync(ln => ln.LastId == lastId, cancellationToken);
     }
 
     public async Task<(List<LastName> Items, int TotalCount)> GetPagedAsync(
@@ -32,7 +32,7 @@ public class LastNameRepository : ILastNameRepository
         LastNameStatus? status,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<LastName>().AsNoTracking();
+        var query = _context.LastNameRepository.AsNoTracking();
 
         // Apply filters
         if (customerId.HasValue)
@@ -67,7 +67,7 @@ public class LastNameRepository : ILastNameRepository
 
     public async Task<bool> ExistsByCodeAsync(string lastCode, int? excludeId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<LastName>().AsNoTracking();
+        var query = _context.LastNameRepository.AsNoTracking();
 
         query = query.Where(ln => ln.LastCode == lastCode);
 
@@ -102,19 +102,19 @@ public class LastNameRepository : ILastNameRepository
 
     public async Task AddAsync(LastName lastName, CancellationToken cancellationToken = default)
     {
-        await _context.Set<LastName>().AddAsync(lastName, cancellationToken);
+        await _context.LastNameRepository.AddAsync(lastName, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(LastName lastName, CancellationToken cancellationToken = default)
     {
-        _context.Set<LastName>().Update(lastName);
+        _context.LastNameRepository.Update(lastName);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(LastName lastName, CancellationToken cancellationToken = default)
     {
-        _context.Set<LastName>().Remove(lastName);
+        _context.LastNameRepository.Remove(lastName);
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
