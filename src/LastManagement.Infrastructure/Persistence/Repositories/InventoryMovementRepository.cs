@@ -15,7 +15,7 @@ public class InventoryMovementRepository : IInventoryMovementRepository
 
     public async Task<InventoryMovement?> GetByIdAsync(int movementId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<InventoryMovement>()
+        return await _context.InventoryMovementsRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.MovementId == movementId, cancellationToken);
     }
@@ -29,7 +29,7 @@ public class InventoryMovementRepository : IInventoryMovementRepository
         int limit,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<InventoryMovement>()
+        var query = _context.InventoryMovementsRepository
             .AsNoTracking()
             .AsQueryable();
 
@@ -67,7 +67,7 @@ public class InventoryMovementRepository : IInventoryMovementRepository
 
     public async Task AddAsync(InventoryMovement movement, CancellationToken cancellationToken = default)
     {
-        await _context.Set<InventoryMovement>().AddAsync(movement, cancellationToken);
+        await _context.InventoryMovementsRepository.AddAsync(movement, cancellationToken);
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)

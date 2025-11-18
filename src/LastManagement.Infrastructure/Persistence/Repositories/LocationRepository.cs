@@ -16,17 +16,17 @@ public sealed class LocationRepository : ILocationRepository
 
     public async Task<Location?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Location>().AsNoTracking().FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        return await _context.LocationsRepository.AsNoTracking().FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
     public async Task<Location?> GetByIdForUpdateAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Location>().FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        return await _context.LocationsRepository.FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
     public async Task<List<Location>> GetAllAsync(string? filterType, bool? filterActive, CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<Location>().AsNoTracking();
+        var query = _context.LocationsRepository.AsNoTracking();
 
         if (!string.IsNullOrEmpty(filterType) && Enum.TryParse<LocationType>(filterType, out var type))
         {
@@ -43,7 +43,7 @@ public sealed class LocationRepository : ILocationRepository
 
     public async Task<bool> ExistsByCodeAsync(string locationCode, int? excludeId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Set<Location>().AsNoTracking().Where(l => l.LocationCode == locationCode);
+        var query = _context.LocationsRepository.AsNoTracking().Where(l => l.LocationCode == locationCode);
 
         if (excludeId.HasValue)
         {
@@ -60,16 +60,16 @@ public sealed class LocationRepository : ILocationRepository
 
     public async Task AddAsync(Location location, CancellationToken cancellationToken = default)
     {
-        await _context.Set<Location>().AddAsync(location, cancellationToken);
+        await _context.LocationsRepository.AddAsync(location, cancellationToken);
     }
 
     public void Update(Location location)
     {
-        _context.Set<Location>().Update(location);
+        _context.LocationsRepository.Update(location);
     }
 
     public void Delete(Location location)
     {
-        _context.Set<Location>().Remove(location);
+        _context.LocationsRepository.Remove(location);
     }
 }

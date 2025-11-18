@@ -15,44 +15,44 @@ public sealed class AccountRepository : IAccountRepository
 
     public async Task<Account?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        return await _context.Accounts
+        return await _context.AccountsRepository
             //.AsNoTracking()
             .FirstOrDefaultAsync(a => a.Username == username, cancellationToken);
     }
 
     public async Task<Account?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Accounts
+        return await _context.AccountsRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
     public async Task<Account?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        return await _context.Accounts
+        return await _context.AccountsRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.RefreshToken == refreshToken, cancellationToken);
     }
 
     public async Task AddAsync(Account account, CancellationToken cancellationToken = default)
     {
-        await _context.Accounts.AddAsync(account, cancellationToken);
+        await _context.AccountsRepository.AddAsync(account, cancellationToken);
     }
 
     public void Update(Account account)
     {
-        _context.Accounts.Update(account);
+        _context.AccountsRepository.Update(account);
     }
 
     public async Task<Account?> GetByUsernameForUpdateAsync(string username, CancellationToken cancellationToken = default)
     {
-        return await _context.Accounts
+        return await _context.AccountsRepository
             .FirstOrDefaultAsync(a => a.Username == username, cancellationToken);
     }
 
     public async Task<Account?> GetByRefreshTokenForUpdateAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        return await _context.Accounts
+        return await _context.AccountsRepository
             .FirstOrDefaultAsync(a => a.RefreshToken == refreshToken, cancellationToken);
     }
 }

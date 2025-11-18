@@ -312,6 +312,54 @@ namespace LastManagement.Infrastructure.Migrations
                     b.ToTable("inventory_stocks", (string)null);
                 });
 
+            modelBuilder.Entity("LastManagement.Domain.LastModels.Entities.LastModel", b =>
+                {
+                    b.Property<int>("LastModelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("last_model_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LastModelId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("LastId")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_id");
+
+                    b.Property<string>("ModelCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("model_code");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.HasKey("LastModelId");
+
+                    b.HasIndex("LastId")
+                        .HasDatabaseName("idx_last_models_last_id");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("idx_last_models_status");
+
+                    b.HasIndex("LastId", "ModelCode")
+                        .IsUnique()
+                        .HasDatabaseName("uq_last_models_composite");
+
+                    b.ToTable("last_models", (string)null);
+                });
+
             modelBuilder.Entity("LastManagement.Domain.LastNames.Entities.LastName", b =>
                 {
                     b.Property<int>("LastId")
@@ -495,6 +543,17 @@ namespace LastManagement.Infrastructure.Migrations
                         .HasDatabaseName("idx_locations_type");
 
                     b.ToTable("locations", (string)null);
+                });
+
+            modelBuilder.Entity("LastManagement.Domain.LastModels.Entities.LastModel", b =>
+                {
+                    b.HasOne("LastManagement.Domain.LastNames.Entities.LastName", "LastName")
+                        .WithMany()
+                        .HasForeignKey("LastId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LastName");
                 });
 
             modelBuilder.Entity("LastManagement.Domain.LastSizes.LastSize", b =>
