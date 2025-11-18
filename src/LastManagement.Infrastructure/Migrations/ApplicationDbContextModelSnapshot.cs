@@ -251,9 +251,6 @@ namespace LastManagement.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
                     b.Property<int>("LastId")
                         .HasColumnType("integer")
                         .HasColumnName("last_id");
@@ -313,6 +310,73 @@ namespace LastManagement.Infrastructure.Migrations
                         .HasDatabaseName("uq_inventory_stocks_composite");
 
                     b.ToTable("inventory_stocks", (string)null);
+                });
+
+            modelBuilder.Entity("LastManagement.Domain.LastNames.Entities.LastName", b =>
+                {
+                    b.Property<int>("LastId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("last_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LastId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("DiscontinueReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("discontinue_reason");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LastCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("last_code");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("version");
+
+                    b.HasKey("LastId");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("idx_last_names_customer");
+
+                    b.HasIndex("LastCode")
+                        .IsUnique()
+                        .HasDatabaseName("idx_last_names_code");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("idx_last_names_status");
+
+                    b.ToTable("last_names", (string)null);
                 });
 
             modelBuilder.Entity("LastManagement.Domain.LastSizes.LastSize", b =>

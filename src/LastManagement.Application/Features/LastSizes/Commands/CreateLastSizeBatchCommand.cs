@@ -13,9 +13,9 @@ public class CreateLastSizeBatchCommand
         _repository = repository;
     }
 
-    public async Task<BatchOperationResult> ExecuteAsync(CreateLastSizeBatchRequest request, CancellationToken cancellationToken = default)
+    public async Task<LastSizesBatchOperationResult> ExecuteAsync(CreateLastSizeBatchRequest request, CancellationToken cancellationToken = default)
     {
-        var result = new BatchOperationResult();
+        var result = new LastSizesBatchOperationResult();
 
         foreach (var sizeRequest in request.Sizes)
         {
