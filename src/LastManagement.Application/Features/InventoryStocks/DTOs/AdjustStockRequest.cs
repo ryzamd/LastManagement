@@ -1,6 +1,7 @@
 using LastManagement.Domain.InventoryStocks;
 using System.ComponentModel.DataAnnotations;
 
+namespace LastManagement.Application.Features.InventoryStocks.DTOs;
 public class AdjustStockRequest
 {
     [Required]

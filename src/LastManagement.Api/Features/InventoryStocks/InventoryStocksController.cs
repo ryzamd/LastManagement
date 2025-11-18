@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using LastManagement.Application.Features.InventoryStocks.Commands;
+using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Queries;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -94,7 +95,7 @@ public class InventoryStocksController : ControllerBase
 
         var etag = Convert.ToBase64String(
             System.Text.Encoding.UTF8.GetBytes($"{stock.Version}"));
-        Response.Headers.Append("ETag", $"\"{etag}\"");
+        Response.Headers.Append("ETag", etag);
 
         return Ok(stock);
     }
@@ -109,10 +110,7 @@ public class InventoryStocksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]
-    public async Task<IActionResult> AdjustStock(
-        int id,
-        [FromBody] AdjustStockRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> AdjustStock(int id, [FromBody] AdjustStockRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -200,9 +198,7 @@ public class InventoryStocksController : ControllerBase
     [ProducesResponseType(typeof(TransferStockResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> TransferStock(
-        [FromBody] TransferStockRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> TransferStock([FromBody] TransferStockRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -256,11 +252,9 @@ public class InventoryStocksController : ControllerBase
     /// </summary>
     [HttpPost("adjustments/$batch")]
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType(typeof(BatchOperationResult), StatusCodes.Status207MultiStatus)]
+    [ProducesResponseType(typeof(LastSizesBatchOperationResult), StatusCodes.Status207MultiStatus)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> BatchAdjustStocks(
-        [FromBody] BatchAdjustmentRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> BatchAdjustStocks([FromBody] BatchAdjustmentRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {

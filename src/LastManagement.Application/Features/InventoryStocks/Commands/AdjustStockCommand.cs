@@ -1,3 +1,4 @@
+using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
 using LastManagement.Domain.InventoryStocks;
 

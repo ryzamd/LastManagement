@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LastManagement.Infrastructure.Persistence.Configurations;
 
-public class InventoryStockConfiguration : IEntityTypeConfiguration<InventoryStock>
+public sealed class InventoryStockConfiguration : IEntityTypeConfiguration<InventoryStock>
 {
     public void Configure(EntityTypeBuilder<InventoryStock> builder)
     {
@@ -14,6 +14,7 @@ public class InventoryStockConfiguration : IEntityTypeConfiguration<InventorySto
         builder.Property(s => s.StockId)
             .HasColumnName("stock_id")
             .ValueGeneratedOnAdd();
+        builder.Ignore(s => s.Id);
 
         builder.Property(s => s.LastId)
             .HasColumnName("last_id")

@@ -1,4 +1,5 @@
 using LastManagement.Api.Features.Authentication;
+using LastManagement.Api.Features.LastNames;
 using LastManagement.Application.Features.Authentication.Commands;
 using LastManagement.Application.Features.Authentication.Queries;
 using LastManagement.Application.Features.Customers.Commands;
@@ -6,6 +7,9 @@ using LastManagement.Application.Features.Customers.Queries;
 using LastManagement.Application.Features.InventoryStocks.Commands;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
 using LastManagement.Application.Features.InventoryStocks.Queries;
+using LastManagement.Application.Features.LastNames.Commands;
+using LastManagement.Application.Features.LastNames.Interfaces;
+using LastManagement.Application.Features.LastNames.Queries;
 using LastManagement.Application.Features.LastSizes.Commands;
 using LastManagement.Application.Features.LastSizes.Queries;
 using LastManagement.Application.Features.Locations.Commands;
@@ -52,6 +56,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<BatchAdjustStockCommand>();
         services.AddScoped<GetInventoryStocksQuery>();
         services.AddScoped<GetInventoryStockByIdQuery>();
+        // Last Names
+        services.AddScoped<ILastNameRepository, LastNameRepository>();
+        services.AddScoped<CreateLastNameCommand>();
+        services.AddScoped<UpdateLastNameCommand>();
+        services.AddScoped<UpdateLastNameBatchCommand>();
+        services.AddScoped<GetLastNamesQuery>();
+        services.AddScoped<GetLastNameByIdQuery>();
 
         return services;
     }
@@ -60,6 +71,7 @@ public static class ServiceCollectionExtensions
     {
         // Configure Mapster
         AuthenticationMapping.ConfigureMappings();
+        LastNamesMapping.ConfigureMappings();
 
         return services;
     }

@@ -1,6 +1,6 @@
 namespace LastManagement.Application.Features.LastSizes.DTOs;
 
-public class BatchOperationResult
+public class LastSizesBatchOperationResult
 {
     public int Successful { get; set; }
     public int Failed { get; set; }

@@ -12,9 +12,9 @@ public class DeleteLastSizeBatchCommand
         _repository = repository;
     }
 
-    public async Task<BatchOperationResult> ExecuteAsync(DeleteLastSizeBatchRequest request, CancellationToken cancellationToken = default)
+    public async Task<LastSizesBatchOperationResult> ExecuteAsync(DeleteLastSizeBatchRequest request, CancellationToken cancellationToken = default)
     {
-        var result = new BatchOperationResult();
+        var result = new LastSizesBatchOperationResult();
 
         foreach (var sizeId in request.Ids)
         {
