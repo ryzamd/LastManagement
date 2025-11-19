@@ -42,6 +42,9 @@ public static class DependencyInjection
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         services.AddScoped<IInventoryStockRepository, InventoryStockRepository>();
         services.AddScoped<ILastModelRepository, LastModelRepository>();
+        services.AddScoped<IInventoryStockRepository, InventoryStockRepository>();
+        services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
+        services.AddScoped<ILastNameRepository, LastNameRepository>();
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

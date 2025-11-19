@@ -11,4 +11,10 @@ public interface IInventoryMovementRepository
     Task AddAsync(InventoryMovement movement, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    Task<Dictionary<int, string>> GetLastNamesMapAsync(IEnumerable<int> lastIds, CancellationToken cancellationToken = default);
+
+    Task<Dictionary<int, string>> GetSizesMapAsync(IEnumerable<int> sizeIds, CancellationToken cancellationToken = default);
+
+    Task<Dictionary<int, string>> GetLocationsMapAsync(IEnumerable<int> locationIds, CancellationToken cancellationToken = default);
 }
