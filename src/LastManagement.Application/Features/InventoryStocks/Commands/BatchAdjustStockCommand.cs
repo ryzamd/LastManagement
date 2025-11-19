@@ -1,15 +1,19 @@
 
 using LastManagement.Application.Features.InventoryStocks.DTOs;
+using LastManagement.Application.Features.InventoryStocks.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Application.Features.InventoryStocks.Commands;
 
 public class BatchAdjustStockCommand
 {
     private readonly AdjustStockCommand _adjustCommand;
+    private readonly IInventoryStockRepository _stockRepository;
 
-    public BatchAdjustStockCommand(AdjustStockCommand adjustCommand)
+    public BatchAdjustStockCommand(AdjustStockCommand adjustCommand, IInventoryStockRepository inventoryStockRepository)
     {
         _adjustCommand = adjustCommand;
+        _stockRepository = inventoryStockRepository;
     }
 
     public async Task<InventoryStockBatchOperationResult> ExecuteAsync(BatchAdjustmentRequest request, string adminUser, CancellationToken cancellationToken = default)
@@ -45,6 +49,22 @@ public class BatchAdjustStockCommand
                     Status = "success",
                     MovementId = adjustResult.MovementId,
                     NewQuantity = adjustResult.NewQuantityGood
+                });
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                result.Failed++;
+                result.Results.Add(new InventoryStockBatchItemResult
+                {
+                    StockId = operation.StockId,
+                    Status = "error",
+                    Error = new InventoryStockBatchError
+                    {
+                        Type = "http://localhost:5000/problems/precondition-failed",
+                        Title = "Concurrency Conflict",
+                        Status = 412,
+                        Detail = ex.Message
+                    }
                 });
             }
             catch (Exception ex)

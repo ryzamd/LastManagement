@@ -5,17 +5,14 @@ using LastManagement.Application.Features.Authentication.Queries;
 using LastManagement.Application.Features.Customers.Commands;
 using LastManagement.Application.Features.Customers.Queries;
 using LastManagement.Application.Features.InventoryStocks.Commands;
-using LastManagement.Application.Features.InventoryStocks.Interfaces;
 using LastManagement.Application.Features.InventoryStocks.Queries;
 using LastManagement.Application.Features.LastModels.Queries;
 using LastManagement.Application.Features.LastNames.Commands;
-using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastNames.Queries;
 using LastManagement.Application.Features.LastSizes.Commands;
 using LastManagement.Application.Features.LastSizes.Queries;
 using LastManagement.Application.Features.Locations.Commands;
 using LastManagement.Application.Features.Locations.Queries;
-using LastManagement.Infrastructure.Persistence.Repositories;
 
 namespace LastManagement.Api.Global.Extensions;
 
@@ -50,15 +47,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<UpdateLastSizeBatchCommand>();
         services.AddScoped<DeleteLastSizeBatchCommand>();
         // Inventory Stock
-        services.AddScoped<IInventoryStockRepository, InventoryStockRepository>();
-        services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         services.AddScoped<AdjustStockCommand>();
         services.AddScoped<TransferStockCommand>();
         services.AddScoped<BatchAdjustStockCommand>();
         services.AddScoped<GetInventoryStocksQuery>();
         services.AddScoped<GetInventoryStockByIdQuery>();
+        services.AddScoped<GetInventorySummaryQuery>();
+        services.AddScoped<GetLowStockQuery>();
+        services.AddScoped<GetInventoryMovementsQuery>();
         // Last Names
-        services.AddScoped<ILastNameRepository, LastNameRepository>();
         services.AddScoped<CreateLastNameCommand>();
         services.AddScoped<UpdateLastNameCommand>();
         services.AddScoped<UpdateLastNameBatchCommand>();

@@ -1,4 +1,6 @@
+using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Domain.InventoryStocks;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace LastManagement.Application.Features.InventoryStocks.Interfaces;
 
@@ -15,4 +17,10 @@ public interface IInventoryStockRepository
     Task AddAsync(InventoryStock stock, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<InventorySummaryRaw>> GetSummaryAsync(int? customerId, int? lastId, int? locationId, CancellationToken cancellationToken = default);
+
+    Task<(IEnumerable<LowStockRaw> Items, int TotalCount, int CriticalCount, int WarningCount)> GetLowStockAsync(int threshold, CancellationToken cancellationToken = default);
+
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 }

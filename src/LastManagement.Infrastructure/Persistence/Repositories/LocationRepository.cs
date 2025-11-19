@@ -72,4 +72,9 @@ public sealed class LocationRepository : ILocationRepository
     {
         _context.LocationsRepository.Remove(location);
     }
+
+    public async Task<bool> ExistsAsync(int locationId, CancellationToken cancellationToken = default)
+    {
+        return await _context.LocationsRepository.AnyAsync(l => l.Id == locationId, cancellationToken);
+    }
 }

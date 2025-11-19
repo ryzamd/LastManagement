@@ -9,6 +9,7 @@ public interface ILocationRepository
     Task<List<Location>> GetAllAsync(string? filterType, bool? filterActive, CancellationToken cancellationToken = default);
     Task<bool> ExistsByCodeAsync(string locationCode, int? excludeId = null, CancellationToken cancellationToken = default);
     Task<bool> HasInventoryAsync(int locationId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(int locationId, CancellationToken cancellationToken = default);
     Task AddAsync(Location location, CancellationToken cancellationToken = default);
     void Update(Location location);
     void Delete(Location location);

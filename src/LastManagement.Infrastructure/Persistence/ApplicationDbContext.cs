@@ -1,3 +1,4 @@
+using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Domain.Accounts;
 using LastManagement.Domain.Common;
 using LastManagement.Domain.Customers;
@@ -31,6 +32,11 @@ public sealed class ApplicationDbContext : DbContext
         modelBuilder.Ignore<Entity>();
         modelBuilder.Ignore<DomainEvent>();
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        //create views through migration ef core
+        modelBuilder.Entity<InventorySummaryRaw>()
+        .ToView("v_inventory_summary")
+        .HasNoKey();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
