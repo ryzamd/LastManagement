@@ -89,4 +89,9 @@ public class InventoryMovementRepository : IInventoryMovementRepository
             .Where(loc => locationIds.Contains(loc.Id))
             .ToDictionaryAsync(loc => loc.Id, loc => loc.LocationName, cancellationToken);
     }
+
+    public async Task CreateAsync(InventoryMovement movement, CancellationToken cancellationToken = default)
+    {
+        await _context.InventoryMovementsRepository.AddAsync(movement, cancellationToken);
+    }
 }

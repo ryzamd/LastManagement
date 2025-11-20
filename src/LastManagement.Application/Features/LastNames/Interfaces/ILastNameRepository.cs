@@ -15,4 +15,5 @@ public interface ILastNameRepository
     Task AddAsync(LastName lastNam, CancellationToken cancellationToken = default);
     Task UpdateAsync(LastName lastName, CancellationToken cancellationToken = default);
     Task DeleteAsync(LastName lastName, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(int lastId, CancellationToken cancellationToken = default);
 }

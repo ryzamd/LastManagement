@@ -69,9 +69,7 @@ public sealed class CustomerRepository : ICustomerRepository
 
     public async Task<bool> HasAssociatedLastsAsync(int customerId, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement when LastNames table is ready
-        // For now, return false
-        return await Task.FromResult(false);
+        return await _context.LastNameRepository.AsNoTracking().AnyAsync(s => s.CustomerId == customerId, cancellationToken);
     }
 
     public async Task AddAsync(Customer customer, CancellationToken cancellationToken = default)

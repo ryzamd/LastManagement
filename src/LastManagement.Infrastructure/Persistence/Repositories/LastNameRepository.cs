@@ -1,5 +1,4 @@
 using LastManagement.Application.Features.LastNames.Interfaces;
-using LastManagement.Domain.InventoryStocks;
 using LastManagement.Domain.LastNames.Entities;
 using LastManagement.Domain.LastNames.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -81,23 +80,17 @@ public class LastNameRepository : ILastNameRepository
 
     public async Task<bool> HasModelsAsync(int lastId, CancellationToken cancellationToken = default)
     {
-        // Check if last_models table has records for this last_id
-        // Note: This will be implemented when last_models is added
-        return await Task.FromResult(false);
+        return await _context.LastModelsRepository.AsNoTracking().AnyAsync(lm => lm.LastId == lastId, cancellationToken);
     }
 
     public async Task<bool> HasInventoryAsync(int lastId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<InventoryStock>()
-            .AsNoTracking()
-            .AnyAsync(s => s.LastId == lastId, cancellationToken);
+        return await _context.InventoryStocksRepository.AsNoTracking().AnyAsync(s => s.LastId == lastId, cancellationToken);
     }
 
     public async Task<bool> HasMovementsAsync(int lastId, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<InventoryMovement>()
-            .AsNoTracking()
-            .AnyAsync(m => m.LastId == lastId, cancellationToken);
+        return await _context.InventoryMovementsRepository.AsNoTracking().AnyAsync(m => m.LastId == lastId, cancellationToken);
     }
 
     public async Task AddAsync(LastName lastName, CancellationToken cancellationToken = default)
@@ -116,5 +109,10 @@ public class LastNameRepository : ILastNameRepository
     {
         _context.LastNameRepository.Remove(lastName);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExistsAsync(int lastId, CancellationToken cancellationToken = default)
+    {
+        return await _context.LastNameRepository.AsNoTracking().AnyAsync(ln => ln.LastId == lastId, cancellationToken);
     }
 }

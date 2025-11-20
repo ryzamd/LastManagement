@@ -13,6 +13,8 @@ using LastManagement.Application.Features.LastSizes.Commands;
 using LastManagement.Application.Features.LastSizes.Queries;
 using LastManagement.Application.Features.Locations.Commands;
 using LastManagement.Application.Features.Locations.Queries;
+using LastManagement.Application.Features.PurchaseOrders.Commands;
+using LastManagement.Application.Features.PurchaseOrders.Queries;
 
 namespace LastManagement.Api.Global.Extensions;
 
@@ -64,6 +66,13 @@ public static class ServiceCollectionExtensions
         // LastModels
         services.AddScoped<GetLastModelsQuery>();
         services.AddScoped<GetModelsByLastIdQuery>();
+        // Purchase Orders
+        services.AddScoped<CreatePurchaseOrderCommand>();
+        services.AddScoped<ConfirmPurchaseOrderCommand>();
+        services.AddScoped<DenyPurchaseOrderCommand>();
+        services.AddScoped<GetPurchaseOrdersQuery>();
+        services.AddScoped<GetPurchaseOrderByIdQuery>();
+        services.AddScoped<GetPendingOrdersQuery>();
 
         return services;
     }

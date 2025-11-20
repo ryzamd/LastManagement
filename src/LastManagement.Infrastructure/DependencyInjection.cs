@@ -6,11 +6,13 @@ using LastManagement.Application.Features.LastModels.Interfaces;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Application.Features.Locations.Interfaces;
+using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Infrastructure.Authentication;
 using LastManagement.Infrastructure.Options;
 using LastManagement.Infrastructure.Persistence;
 using LastManagement.Infrastructure.Persistence.Interceptors;
 using LastManagement.Infrastructure.Persistence.Repositories;
+using LastManagement.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,6 +47,10 @@ public static class DependencyInjection
         services.AddScoped<IInventoryStockRepository, InventoryStockRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         services.AddScoped<ILastNameRepository, LastNameRepository>();
+        // Purchase Orders
+        services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+        services.AddScoped<IPurchaseOrderItemRepository, PurchaseOrderItemRepository>();
+        services.AddScoped<IIdempotencyService, IdempotencyService>();
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -59,6 +65,9 @@ public static class DependencyInjection
         // Current User
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        // Background Services
+        services.AddHostedService<IdempotencyCleanupService>();
 
         return services;
     }

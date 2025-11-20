@@ -153,4 +153,21 @@ public class InventoryStockRepository : IInventoryStockRepository
             .ToListAsync();
         return result.Any();
     }
+
+    public async Task<InventoryStock?> GetByKeysAsync(int lastId, int sizeId, int locationId, CancellationToken cancellationToken = default)
+    {
+        return await _context.InventoryStocksRepository.FirstOrDefaultAsync(
+                        s => s.LastId == lastId && s.SizeId == sizeId && s.LocationId == locationId, cancellationToken);
+    }
+
+    public async Task CreateAsync(InventoryStock stock, CancellationToken cancellationToken = default)
+    {
+        await _context.InventoryStocksRepository.AddAsync(stock, cancellationToken);
+    }
+
+    public async Task UpdateAsync(InventoryStock stock, CancellationToken cancellationToken = default)
+    {
+        _context.InventoryStocksRepository.Update(stock);
+        await Task.CompletedTask;
+    }
 }

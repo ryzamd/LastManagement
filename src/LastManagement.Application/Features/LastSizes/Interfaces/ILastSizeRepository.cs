@@ -13,4 +13,5 @@ public interface ILastSizeRepository
     Task AddAsync(LastSize lastSize, CancellationToken cancellationToken = default);
     Task UpdateAsync(LastSize lastSize, CancellationToken cancellationToken = default);
     Task DeleteAsync(LastSize lastSize, CancellationToken cancellationToken = default);
+    Task<bool> ExistsSizeIdAsync(int sizeValue, CancellationToken cancellationToken = default);
 }
