@@ -17,4 +17,6 @@ public interface IInventoryMovementRepository
     Task<Dictionary<int, string>> GetSizesMapAsync(IEnumerable<int> sizeIds, CancellationToken cancellationToken = default);
 
     Task<Dictionary<int, string>> GetLocationsMapAsync(IEnumerable<int> locationIds, CancellationToken cancellationToken = default);
+
+    Task CreateAsync(InventoryMovement movement, CancellationToken cancellationToken = default);
 }

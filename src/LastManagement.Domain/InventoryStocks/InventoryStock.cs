@@ -36,6 +36,30 @@ public class InventoryStock : Entity
         return stock;
     }
 
+    public static InventoryStock Create(int lastId, int sizeId, int locationId, int quantityGood, int quantityDamaged, int quantityReserved)
+    {
+        return new InventoryStock
+        {
+            LastId = lastId,
+            SizeId = sizeId,
+            LocationId = locationId,
+            QuantityGood = quantityGood,
+            QuantityDamaged = quantityDamaged,
+            QuantityReserved = quantityReserved,
+            LastUpdated = DateTime.UtcNow,
+            Version = 1
+        };
+    }
+
+    public void AdjustQuantity(int quantityGoodDelta, int quantityDamagedDelta, int quantityReservedDelta)
+    {
+        QuantityGood += quantityGoodDelta;
+        QuantityDamaged += quantityDamagedDelta;
+        QuantityReserved += quantityReservedDelta;
+        LastUpdated = DateTime.UtcNow;
+        Version++;
+    }
+
     public void AdjustQuantity(AdjustmentType adjustmentType, int quantity, string reason)
     {
         if (quantity <= 0)

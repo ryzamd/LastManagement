@@ -37,7 +37,6 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Application Handlers
 builder.Services.AddApplicationHandlers();
 
-
 // Mapster Mappings
 builder.Services.AddMappings();
 

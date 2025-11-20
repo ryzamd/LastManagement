@@ -99,4 +99,11 @@ public class LastSizeRepository : ILastSizeRepository
         _context.LastSizesRepository.Remove(lastSize);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<bool> ExistsSizeIdAsync(int sizeId, CancellationToken cancellationToken = default)
+    {
+        return await _context.LastSizesRepository
+            .AsNoTracking()
+            .AnyAsync(ls => ls.SizeId == sizeId, cancellationToken);
+    }
 }

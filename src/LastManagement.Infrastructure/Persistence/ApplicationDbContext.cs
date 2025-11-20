@@ -7,6 +7,7 @@ using LastManagement.Domain.LastModels.Entities;
 using LastManagement.Domain.LastNames.Entities;
 using LastManagement.Domain.LastSizes;
 using LastManagement.Domain.Locations;
+using LastManagement.Domain.PurchaseOrders.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Infrastructure.Persistence;
@@ -25,6 +26,9 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<LastModel> LastModelsRepository => Set<LastModel>();
     public DbSet<InventoryStock> InventoryStocksRepository => Set<InventoryStock>();
     public DbSet<InventoryMovement> InventoryMovementsRepository => Set<InventoryMovement>();
+    public DbSet<PurchaseOrder> PurchaseOrdersRepository => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderItem> PurchaseOrderItemsRepository => Set<PurchaseOrderItem>();
+    public DbSet<IdempotencyKey> IdempotencyKeysRepository => Set<IdempotencyKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

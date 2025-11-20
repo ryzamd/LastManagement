@@ -20,7 +20,7 @@ public abstract class Entity
         _domainEvents.Clear();
     }
 
-    public void IncrementVersion()
+    public virtual void IncrementVersion()
     {
         Version++;
         UpdatedAt = DateTime.UtcNow;

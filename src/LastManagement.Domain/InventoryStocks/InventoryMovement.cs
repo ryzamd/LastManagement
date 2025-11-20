@@ -18,16 +18,7 @@ public class InventoryMovement : Entity
 
     private InventoryMovement() { } // EF Core
 
-    public static InventoryMovement Create(
-        int lastId,
-        int sizeId,
-        int? fromLocationId,
-        int? toLocationId,
-        string movementType,
-        int quantity,
-        string? reason,
-        string? referenceNumber,
-        string? createdBy)
+    public static InventoryMovement Create(int lastId, int sizeId, int? fromLocationId, int? toLocationId, string movementType, int quantity, string? reason, string? referenceNumber, string? createdBy)
     {
         if (quantity <= 0)
             throw new ArgumentException("Quantity must be positive", nameof(quantity));
@@ -45,5 +36,20 @@ public class InventoryMovement : Entity
             CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
         };
+    }
+
+    public static InventoryMovement CreatePurchase(int lastId, int sizeId, int toLocationId, int quantity, string referenceNumber, string createdBy)
+    {
+        return Create(
+            lastId,
+            sizeId,
+            fromLocationId: null,
+            toLocationId: toLocationId,
+            movementType: "Purchase",
+            quantity: quantity,
+            reason: "Purchase Order",
+            referenceNumber: referenceNumber,
+            createdBy: createdBy
+        );
     }
 }

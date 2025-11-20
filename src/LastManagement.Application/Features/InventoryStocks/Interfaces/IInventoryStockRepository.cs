@@ -23,4 +23,10 @@ public interface IInventoryStockRepository
     Task<(IEnumerable<LowStockRaw> Items, int TotalCount, int CriticalCount, int WarningCount)> GetLowStockAsync(int threshold, CancellationToken cancellationToken = default);
 
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+
+    Task<InventoryStock?> GetByKeysAsync(int lastId, int sizeId, int locationId, CancellationToken cancellationToken = default);
+
+    Task CreateAsync(InventoryStock stock, CancellationToken cancellationToken = default);
+
+    Task UpdateAsync(InventoryStock stock, CancellationToken cancellationToken = default);
 }
