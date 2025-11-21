@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Application.Features.InventoryStocks.Commands;
 using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Queries;
@@ -47,7 +48,7 @@ public class InventoryStocksController : ControllerBase
     /// GET /api/v1/inventory/stocks - List inventory stocks
     /// Authorization: Public (Guest)
     /// </summary>
-    [HttpGet("stocks")]
+    [HttpGet(ApiRoutes.Inventory.STOCKS)]
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStocks(
@@ -66,9 +67,7 @@ public class InventoryStocksController : ControllerBase
         var response = new
         {
             value = items,
-            nextLink = !string.IsNullOrEmpty(nextCursor)
-                ? $"/api/v1/inventory/stocks?limit={limit}&after={nextCursor}"
-                : null,
+            nextLink = !string.IsNullOrEmpty(nextCursor) ? $"/api/v1/inventory/stocks?limit={limit}&after={nextCursor}" : null,
             count = totalCount
         };
 
@@ -93,7 +92,7 @@ public class InventoryStocksController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
+                Type = ProblemDetailsConstants.Types.NOT_FOUND,
                 title = "Not Found",
                 status = 404,
                 detail = $"Stock with ID {id} not found",
@@ -114,7 +113,7 @@ public class InventoryStocksController : ControllerBase
     /// Authorization: Admin
     /// </summary>
     [HttpPost("stocks/{id:int}/adjust")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(AdjustStockResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -162,7 +161,7 @@ public class InventoryStocksController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
+                Type = ProblemDetailsConstants.Types.NOT_FOUND,
                 title = "Not Found",
                 status = 404,
                 detail = ex.Message,
@@ -202,7 +201,7 @@ public class InventoryStocksController : ControllerBase
     /// Authorization: Admin
     /// </summary>
     [HttpPost("transfers")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(TransferStockResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -232,7 +231,7 @@ public class InventoryStocksController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
+                Type = ProblemDetailsConstants.Types.NOT_FOUND,
                 title = "Not Found",
                 status = 404,
                 detail = ex.Message,
@@ -259,7 +258,7 @@ public class InventoryStocksController : ControllerBase
     /// Authorization: Admin
     /// </summary>
     [HttpPost("adjustments/$batch")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(LastSizesBatchOperationResult), StatusCodes.Status207MultiStatus)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> BatchAdjustStocks([FromBody] BatchAdjustmentRequest request, CancellationToken cancellationToken)

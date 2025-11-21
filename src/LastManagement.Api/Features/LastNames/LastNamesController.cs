@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Features.LastNames.Commands;
 using LastManagement.Application.Features.LastNames.DTOs;
@@ -100,7 +101,7 @@ public class LastNamesController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
+                Type = ProblemDetailsConstants.Types.NOT_FOUND,
                 title = "Not Found",
                 status = 404,
                 detail = $"Last name with ID {id} not found",
@@ -137,7 +138,7 @@ public class LastNamesController : ControllerBase
     /// Authorization: Admin
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -189,8 +190,8 @@ public class LastNamesController : ControllerBase
         {
             return Conflict(new
             {
-                type = "http://localhost:5000/problems/conflict",
-                title = "Conflict",
+                Type = ProblemDetailsConstants.Types.CONFLICT,
+                Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -219,7 +220,7 @@ public class LastNamesController : ControllerBase
     /// Requires: If-Match header
     /// </summary>
     [HttpPatch("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -268,7 +269,7 @@ public class LastNamesController : ControllerBase
             {
                 return NotFound(new
                 {
-                    type = "http://localhost:5000/problems/not-found",
+                    Type = ProblemDetailsConstants.Types.NOT_FOUND,
                     title = "Not Found",
                     status = 404,
                     detail = $"Last name with ID {id} not found",
@@ -355,8 +356,8 @@ public class LastNamesController : ControllerBase
         {
             return Conflict(new
             {
-                type = "http://localhost:5000/problems/conflict",
-                title = "Conflict",
+                Type = ProblemDetailsConstants.Types.CONFLICT,
+                Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -383,7 +384,7 @@ public class LastNamesController : ControllerBase
     /// Authorization: Admin
     /// </summary>
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -397,7 +398,7 @@ public class LastNamesController : ControllerBase
             {
                 return NotFound(new
                 {
-                    type = "http://localhost:5000/problems/not-found",
+                    Type = ProblemDetailsConstants.Types.NOT_FOUND,
                     title = "Not Found",
                     status = 404,
                     detail = $"Last name with ID {id} not found",
@@ -415,8 +416,8 @@ public class LastNamesController : ControllerBase
             {
                 return Conflict(new
                 {
-                    type = "http://localhost:5000/problems/conflict",
-                    title = "Conflict",
+                    Type = ProblemDetailsConstants.Types.CONFLICT,
+                    Title = ProblemDetailsConstants.Titles.CONFLICT,
                     status = 409,
                     detail = "Cannot delete last name because it has associated records",
                     instance = HttpContext.Request.Path.ToString(),
@@ -467,7 +468,7 @@ public class LastNamesController : ControllerBase
     /// Authorization: Admin
     /// </summary>
     [HttpPatch("$batch")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(LastNamesBatchOperationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(LastNamesBatchOperationResult), StatusCodes.Status207MultiStatus)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Application.Features.Locations.Commands;
 using LastManagement.Application.Features.Locations.DTOs;
 using LastManagement.Application.Features.Locations.Queries;
@@ -72,8 +73,8 @@ public sealed class LocationsController : ControllerBase
         {
             return NotFound(new ProblemDetails
             {
-                Type = "http://localhost:5000/problems/not-found",
-                Title = "Resource Not Found",
+                Type = ProblemDetailsConstants.Types.NOT_FOUND,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 Status = StatusCodes.Status404NotFound,
                 Detail = result.Error,
                 Instance = $"/api/v1/locations/{id}"
@@ -85,7 +86,7 @@ public sealed class LocationsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(LocationDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateLocation([FromBody] CreateLocationRequest request, CancellationToken cancellationToken)
@@ -99,8 +100,8 @@ public sealed class LocationsController : ControllerBase
             {
                 return Conflict(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/duplicate-resource",
-                    Title = "Duplicate Resource",
+                    Type = ProblemDetailsConstants.Types.DUPLICATE_RESOURCE,
+                    Title = ProblemDetailsConstants.Titles.DUPLICATE_RESOURCE,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
                     Instance = "/api/v1/locations"
@@ -114,7 +115,7 @@ public sealed class LocationsController : ControllerBase
     }
 
     [HttpPatch("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(LocationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateLocation(int id, [FromBody] UpdateLocationRequest request, CancellationToken cancellationToken)
@@ -128,8 +129,8 @@ public sealed class LocationsController : ControllerBase
             {
                 return NotFound(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/not-found",
-                    Title = "Resource Not Found",
+                    Type = ProblemDetailsConstants.Types.NOT_FOUND,
+                    Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
                     Instance = $"/api/v1/locations/{id}"
@@ -142,7 +143,7 @@ public sealed class LocationsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> DeleteLocation(int id, CancellationToken cancellationToken)
@@ -156,8 +157,8 @@ public sealed class LocationsController : ControllerBase
             {
                 return NotFound(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/not-found",
-                    Title = "Resource Not Found",
+                    Type = ProblemDetailsConstants.Types.NOT_FOUND,
+                    Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
                     Instance = $"/api/v1/locations/{id}"
@@ -168,8 +169,8 @@ public sealed class LocationsController : ControllerBase
             {
                 return Conflict(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/conflict",
-                    Title = "Conflict",
+                    Type = ProblemDetailsConstants.Types.CONFLICT,
+                    Title = ProblemDetailsConstants.Titles.CONFLICT,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
                     Instance = $"/api/v1/locations/{id}"

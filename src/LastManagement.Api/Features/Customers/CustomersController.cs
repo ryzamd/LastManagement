@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Api.Global.Constants;
 using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Features.Customers.Commands;
@@ -10,8 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace LastManagement.Api.Features.Customers;
 
 [ApiController]
-[Route("api/v1/customers")]
-[ApiVersion("1.0")]
+[Route(ApiRoutes.Customers.BASE)]
+[ApiVersion(ApiRoutes.API_VERSION)]
 public sealed class CustomersController : ControllerBase
 {
     private readonly GetCustomersQueryHandler _getCustomersHandler;
@@ -50,10 +51,7 @@ public sealed class CustomersController : ControllerBase
         string? filterStatus = null;
         if (!string.IsNullOrEmpty(filter))
         {
-            var match = System.Text.RegularExpressions.Regex.Match(
-                filter,
-                @"status\s+eq\s+'(\w+)'",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var match = System.Text.RegularExpressions.Regex.Match(filter, RegexPattern.Customer.GET_CUSTOMERS, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 filterStatus = match.Groups[1].Value;
@@ -88,8 +86,8 @@ public sealed class CustomersController : ControllerBase
         {
             return NotFound(new ProblemDetails
             {
-                Type = "http://localhost:5000/problems/not-found",
-                Title = "Resource Not Found",
+                Type = ProblemDetailsConstants.Types.NOT_FOUND,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 Status = StatusCodes.Status404NotFound,
                 Detail = result.Error,
                 Instance = $"/api/v1/customers/{id}"
@@ -107,7 +105,7 @@ public sealed class CustomersController : ControllerBase
     /// Create a new customer
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -118,12 +116,12 @@ public sealed class CustomersController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error!.Contains("already exists"))
+            if (result.Error!.Contains(ApiMessage.Errors.Customer.CUSTOMER_EXISTED))
             {
                 return Conflict(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/duplicate-resource",
-                    Title = "Duplicate Resource",
+                    Type = ProblemDetailsConstants.Types.DUPLICATE_RESOURCE,
+                    Title = ProblemDetailsConstants.Titles.DUPLICATE_RESOURCE,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
                     Instance = "/api/v1/customers"
@@ -146,7 +144,7 @@ public sealed class CustomersController : ControllerBase
     /// Partial update of customer
     /// </summary>
     [HttpPatch("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]
@@ -158,10 +156,10 @@ public sealed class CustomersController : ControllerBase
         {
             return BadRequest(new ProblemDetails
             {
-                Type = "http://localhost:5000/problems/validation-error",
-                Title = "Validation Failed",
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 Status = StatusCodes.Status400BadRequest,
-                Detail = "If-Match header with valid ETag is required",
+                Detail = ProblemDetailsConstants.Details.IF_MATCH_HEADER_REQUIRED_ETAG,
                 Instance = $"/api/v1/customers/{id}"
             });
         }
@@ -176,36 +174,36 @@ public sealed class CustomersController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error == "Customer not found")
+            if (result.Error == ApiMessage.Errors.Customer.CUSTOMER_NOT_FOUND)
             {
                 return NotFound(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/not-found",
-                    Title = "Resource Not Found",
+                    Type = ProblemDetailsConstants.Types.NOT_FOUND,
+                    Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
                     Instance = $"/api/v1/customers/{id}"
                 });
             }
 
-            if (result.Error!.Contains("modified by another user"))
+            if (result.Error!.Contains(ApiMessage.Errors.Customer.CUSTOMER_MODIFIED_BY_ANOTHER))
             {
                 return StatusCode(StatusCodes.Status412PreconditionFailed, new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/precondition-failed",
-                    Title = "Precondition Failed",
+                    Type = ProblemDetailsConstants.Types.PRECONDITION_FAILED,
+                    Title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
                     Status = StatusCodes.Status412PreconditionFailed,
                     Detail = result.Error,
                     Instance = $"/api/v1/customers/{id}"
                 });
             }
 
-            if (result.Error!.Contains("already exists"))
+            if (result.Error!.Contains(ApiMessage.Errors.Customer.CUSTOMER_EXISTED))
             {
                 return Conflict(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/duplicate-resource",
-                    Title = "Duplicate Resource",
+                    Type = ProblemDetailsConstants.Types.DUPLICATE_RESOURCE,
+                    Title = ProblemDetailsConstants.Titles.DUPLICATE_RESOURCE,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
                     Instance = $"/api/v1/customers/{id}"
@@ -225,7 +223,7 @@ public sealed class CustomersController : ControllerBase
     /// Delete a customer
     /// </summary>
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -236,24 +234,24 @@ public sealed class CustomersController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error == "Customer not found")
+            if (result.Error == ApiMessage.Errors.Customer.CUSTOMER_NOT_FOUND)
             {
                 return NotFound(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/not-found",
-                    Title = "Resource Not Found",
+                    Type = ProblemDetailsConstants.Types.NOT_FOUND,
+                    Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
                     Instance = $"/api/v1/customers/{id}"
                 });
             }
 
-            if (result.Error!.Contains("has associated lasts"))
+            if (result.Error!.Contains(ApiMessage.Errors.Customer.CUSTOMER_HAS_ASSOCIATED_LASTS))
             {
                 return Conflict(new ProblemDetails
                 {
-                    Type = "http://localhost:5000/problems/conflict",
-                    Title = "Conflict",
+                    Type = ProblemDetailsConstants.Types.CONFLICT,
+                    Title = ProblemDetailsConstants.Titles.CONFLICT,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
                     Instance = $"/api/v1/customers/{id}"

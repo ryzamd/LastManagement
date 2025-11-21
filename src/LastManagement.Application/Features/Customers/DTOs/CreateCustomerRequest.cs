@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using LastManagement.Application.Constants;
 
 namespace LastManagement.Application.Features.Customers.DTOs;
 
 public sealed record CreateCustomerRequest
 {
-    [Required(ErrorMessage = "Customer name is required")]
-    [StringLength(200, MinimumLength = 1, ErrorMessage = "Customer name must be between 1 and 200 characters")]
+    [Required(ErrorMessage = ValidationMessages.Customer.CUSTOMER_NAME_REQUIRED)]
+    [StringLength(200, MinimumLength = 1, ErrorMessage = ValidationMessages.Customer.CUSTOMER_NAME_LENGTH)]
     public string CustomerName { get; init; } = string.Empty;
 
-    [Required(ErrorMessage = "Status is required")]
-    [RegularExpression("^(Active|Inactive|Suspended)$", ErrorMessage = "Status must be Active, Inactive, or Suspended")]
+    [Required(ErrorMessage = ValidationMessages.Customer.STATUS_REQUIRED)]
+    [RegularExpression("^(Active|Inactive|Suspended)$", ErrorMessage = ValidationMessages.Customer.STATUS_INVALID)]
     public string Status { get; init; } = "Active";
 }

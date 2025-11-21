@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using LastManagement.Application.Constants;
 
 namespace LastManagement.Application.Features.LastNames.DTOs;
 
 public class CreateLastNameRequest
 {
-    [Required(ErrorMessage = "Customer ID is required")]
-    [Range(1, int.MaxValue, ErrorMessage = "Customer ID must be positive")]
+    [Required(ErrorMessage = ValidationMessages.LastName.CUSTOMER_ID_REQUIRED)]
+    [Range(1, int.MaxValue, ErrorMessage = ValidationMessages.LastName.CUSTOMER_ID_POSITIVE)]
     public int CustomerId { get; set; }
 
-    [Required(ErrorMessage = "Last code is required")]
-    [StringLength(50, MinimumLength = 1, ErrorMessage = "Last code must be between 1 and 50 characters")]
+    [Required(ErrorMessage = ValidationMessages.LastName.LAST_CODE_REQUIRED)]
+    [StringLength(50, MinimumLength = 1, ErrorMessage = ValidationMessages.LastName.LAST_CODE_LENGTH)]
     public string LastCode { get; set; } = string.Empty;
 }

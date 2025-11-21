@@ -1,3 +1,4 @@
+using LastManagement.Api.Constants;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text.Json;
@@ -23,20 +24,20 @@ public sealed class ExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred");
+            _logger.LogError(ex, LogMessages.Exceptions.UNHANDLED_EXCEPTION);
             await HandleExceptionAsync(context, ex);
         }
     }
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        context.Response.ContentType = "application/problem+json";
+        context.Response.ContentType = HttpConstants.ContentTypes.APPLICATION_PROBLEM_JSON;
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
         var problemDetails = new ProblemDetails
         {
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-            Title = "Internal Server Error",
+            Type = ProblemDetailsConstants.Types.INTERNAL_SERVER_ERROR,
+            Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
             Status = StatusCodes.Status500InternalServerError,
             Detail = exception.Message,
             Instance = context.Request.Path
