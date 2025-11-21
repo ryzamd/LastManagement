@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Api.Global.Extensions;
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Features.Authentication.Commands;
@@ -12,8 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace LastManagement.Api.Features.Authentication;
 
 [ApiController]
-[Route("api/v1/auth")]
-[ApiVersion("1.0")]
+[Route(ApiRoutes.Authentication.BASE)]
+[ApiVersion(ApiRoutes.API_VERSION)]
 public sealed class AuthenticationController : ControllerBase
 {
     private readonly LoginCommandHandler _loginHandler;
@@ -52,7 +53,7 @@ public sealed class AuthenticationController : ControllerBase
     /// <summary>
     /// Authenticate admin user and receive JWT tokens
     /// </summary>
-    [HttpPost("login")]
+    [HttpPost(ApiRoutes.Authentication.LOGIN)]
     [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -67,7 +68,7 @@ public sealed class AuthenticationController : ControllerBase
     /// <summary>
     /// Refresh access token using refresh token
     /// </summary>
-    [HttpPost("refresh")]
+    [HttpPost(ApiRoutes.Authentication.REFRESH)]
     [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -82,7 +83,7 @@ public sealed class AuthenticationController : ControllerBase
     /// <summary>
     /// Invalidate refresh token (logout)
     /// </summary>
-    [HttpPost("logout")]
+    [HttpPost(ApiRoutes.Authentication.LOGOUT)]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -103,7 +104,7 @@ public sealed class AuthenticationController : ControllerBase
     /// <summary>
     /// Get current authenticated user information
     /// </summary>
-    [HttpGet("me")]
+    [HttpGet(ApiRoutes.Authentication.ME)]
     [Authorize]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -124,7 +125,7 @@ public sealed class AuthenticationController : ControllerBase
     /// <summary>
     /// [DEV ONLY] Create admin account
     /// </summary>
-    [HttpPost("create-admin")]
+    [HttpPost(ApiRoutes.Authentication.CREATE_ADMIN)]
     [AllowAnonymous]
 #if !DEBUG
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -139,7 +140,7 @@ public sealed class AuthenticationController : ControllerBase
         var existingAccount = await _accountRepository.GetByUsernameAsync(request.Username, cancellationToken);
         if (existingAccount != null)
         {
-            return Conflict("Username already exists");
+            return Conflict(ApiMessage.Errors.Authenication.USER_NAME_CONFLICT);
         }
 
         var passwordHash = _passwordHasher.HashPassword(request.Password);
@@ -148,6 +149,6 @@ public sealed class AuthenticationController : ControllerBase
         await _accountRepository.AddAsync(account, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Ok(new { message = "Admin created", username = account.Username });
+        return Ok(new { message = ApiMessage.Success.Authenication.CREATE_ADMIN_ACCOUNT_SUCCESS, username = account.Username });
     }
 }

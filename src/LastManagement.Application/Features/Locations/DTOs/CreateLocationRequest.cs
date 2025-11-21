@@ -1,19 +1,20 @@
 using System.ComponentModel.DataAnnotations;
+using LastManagement.Application.Constants;
 
 namespace LastManagement.Application.Features.Locations.DTOs;
 
 public sealed record CreateLocationRequest
 {
-    [Required(ErrorMessage = "Location code is required")]
-    [StringLength(20, MinimumLength = 1, ErrorMessage = "Location code must be between 1 and 20 characters")]
+    [Required(ErrorMessage = ValidationMessages.Location.CODE_REQUIRED)]
+    [StringLength(20, MinimumLength = 1, ErrorMessage = ValidationMessages.Location.CODE_LENGTH)]
     public string LocationCode { get; init; } = string.Empty;
 
-    [Required(ErrorMessage = "Location name is required")]
-    [StringLength(100, MinimumLength = 1, ErrorMessage = "Location name must be between 1 and 100 characters")]
+    [Required(ErrorMessage = ValidationMessages.Location.NAME_REQUIRED)]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = ValidationMessages.Location.NAME_LENGTH)]
     public string LocationName { get; init; } = string.Empty;
 
-    [Required(ErrorMessage = "Location type is required")]
+    [Required(ErrorMessage = ValidationMessages.Location.TYPE_REQUIRED)]
     [RegularExpression("^(Production|Development|Quality|Storage)$",
-        ErrorMessage = "Location type must be Production, Development, Quality, or Storage")]
+        ErrorMessage = ValidationMessages.Location.TYPE_INVALID)]
     public string LocationType { get; init; } = "Production";
 }

@@ -1,5 +1,6 @@
 using LastManagement.Domain.InventoryStocks;
 using System.ComponentModel.DataAnnotations;
+using LastManagement.Application.Constants;
 
 namespace LastManagement.Application.Features.InventoryStocks.DTOs;
 public class AdjustStockRequest
@@ -7,7 +8,7 @@ public class AdjustStockRequest
     [Required]
     public AdjustmentType AdjustmentType { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+    [Range(1, int.MaxValue, ErrorMessage = ValidationMessages.Inventory.QUANTITY_MIN)]
     public int Quantity { get; set; }
 
     [Required]

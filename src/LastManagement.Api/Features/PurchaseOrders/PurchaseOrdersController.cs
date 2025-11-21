@@ -1,9 +1,11 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Features.PurchaseOrders.Commands;
 using LastManagement.Application.Features.PurchaseOrders.DTOs;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Application.Features.PurchaseOrders.Queries;
+using LastManagement.Domain.PurchaseOrders.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -12,7 +14,7 @@ namespace LastManagement.Api.Features.PurchaseOrders;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/purchase-orders")]
+[Route(ApiRoutes.PurchaseOrders.BASE)]
 public class PurchaseOrdersController : ControllerBase
 {
     private readonly ILogger<PurchaseOrdersController> _logger;
@@ -50,7 +52,7 @@ public class PurchaseOrdersController : ControllerBase
                 limit = 20;
 
             // Guest users can only see their own orders
-            var isAdmin = User.IsInRole("Admin");
+            var isAdmin = User.IsInRole(AuthorizationConstants.Roles.ADMIN);
             if (!isAdmin && !string.IsNullOrWhiteSpace(_currentUserService.Username))
             {
                 requestedBy = _currentUserService.Username;
@@ -81,23 +83,23 @@ public class PurchaseOrdersController : ControllerBase
                     reviewedBy = po.ReviewedBy,
                     _links = new
                     {
-                        self = new { href = $"/api/v1/purchase-orders/{po.Id}" },
-                        items = new { href = $"/api/v1/purchase-orders/{po.Id}?$expand=items" },
-                        confirm = po.Status == "Pending" && isAdmin ? new
+                        self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, po.Id) },
+                        items = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_WITH_ITEMS_TEMPLATE, po.Id) },
+                        confirm = po.Status == nameof(PurchaseOrderStatus.Pending) && isAdmin ? new
                         {
-                            href = $"/api/v1/purchase-orders/{po.Id}/confirm",
-                            method = "POST",
-                            requires = new[] { "Admin" }
+                            href = string.Format(ApiRoutes.PurchaseOrders.FULL_CONFIRM_TEMPLATE, po.Id),
+                            method = HttpConstants.Methods.POST,
+                            requires = new[] { AuthorizationConstants.Roles.ADMIN }
                         } : null,
-                        deny = po.Status == "Pending" && isAdmin ? new
+                        deny = po.Status == nameof(PurchaseOrderStatus.Pending) && isAdmin ? new
                         {
-                            href = $"/api/v1/purchase-orders/{po.Id}/deny",
-                            method = "POST",
-                            requires = new[] { "Admin" }
+                            href = string.Format(ApiRoutes.PurchaseOrders.FULL_DENY_TEMPLATE, po.Id),
+                            method = HttpConstants.Methods.POST,
+                            requires = new[] { AuthorizationConstants.Roles.ADMIN }
                         } : null
                     }
                 }),
-                _atNextLink = nextId.HasValue ? $"/api/v1/purchase-orders?limit={limit}&after={nextId.Value}" : null,
+                _atNextLink = nextId.HasValue ? string.Format(ApiRoutes.PurchaseOrders.FULL_PAGINATION_TEMPLATE, limit, nextId.Value) : null,
                 _atCount = totalCount
             };
 
@@ -107,8 +109,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
+                type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 status = 400,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -121,13 +123,13 @@ public class PurchaseOrdersController : ControllerBase
     /// GET /api/v1/purchase-orders/{id} - Get single purchase order
     /// Authorization: Public (Guest)
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet(ApiRoutes.PurchaseOrders.BY_ID)]
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetPurchaseOrderById(int id, [FromQuery(Name = "$expand")] string? expand, [FromServices] GetPurchaseOrderByIdQuery query = null!, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetPurchaseOrderById(int id, [FromQuery(Name = ApiRoutes.QueryParameters.EXPAND)] string? expand, [FromServices] GetPurchaseOrderByIdQuery query = null!, CancellationToken cancellationToken = default)
     {
-        var expandItems = expand?.Contains("items", StringComparison.OrdinalIgnoreCase) ?? false;
+        var expandItems = expand?.Contains(ApiRoutes.QueryParameters.EXPAND_ITEMS, StringComparison.OrdinalIgnoreCase) ?? false;
 
         var order = await query.ExecuteAsync(id, expandItems, cancellationToken);
 
@@ -135,8 +137,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
-                title = "Not Found",
+                type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
+                title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 status = 404,
                 detail = $"Purchase order with ID {id} not found",
                 instance = HttpContext.Request.Path.ToString(),
@@ -169,8 +171,8 @@ public class PurchaseOrdersController : ControllerBase
                 quantityRequested = item.QuantityRequested,
                 _links = new
                 {
-                    last = new { href = $"/api/v1/last-names/{item.LastId}" },
-                    size = new { href = $"/api/v1/last-sizes/{item.SizeId}" }
+                    last = new { href = string.Format(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, item.LastId) },
+                    size = new { href = string.Format(ApiRoutes.LastSizes.FULL_BY_ID_TEMPLATE, item.SizeId) }
                 }
             }) : null,
             summary = new
@@ -180,9 +182,9 @@ public class PurchaseOrdersController : ControllerBase
             },
             _links = new
             {
-                self = new { href = $"/api/v1/purchase-orders/{order.Id}" },
-                location = new { href = $"/api/v1/locations/{order.LocationId}" },
-                inventory = new { href = $"/api/v1/inventory/stocks?$filter=locationId eq {order.LocationId}" }
+                self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) },
+                location = new { href = string.Format(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, order.LocationId) },
+                inventory = new { href = string.Format("/api/v1/inventory/stocks?$filter=locationId eq {0}", order.LocationId) }
             }
         };
 
@@ -200,7 +202,7 @@ public class PurchaseOrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreatePurchaseOrder(
         [FromBody] CreatePurchaseOrderRequest request,
-        [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey,
+        [FromHeader(Name = HttpConstants.Headers.IDEMPOTENCY_KEY)] string? idempotencyKey,
         [FromServices] CreatePurchaseOrderCommand command = null!,
         CancellationToken cancellationToken = default)
     {
@@ -257,7 +259,7 @@ public class PurchaseOrdersController : ControllerBase
                 }),
                 _links = new
                 {
-                    self = new { href = $"/api/v1/purchase-orders/{order.OrderId}" }
+                    self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.OrderId) }
                 }
             };
 
@@ -272,7 +274,7 @@ public class PurchaseOrdersController : ControllerBase
                     cancellationToken);
             }
 
-            Response.Headers["Location"] = $"/api/v1/purchase-orders/{order.OrderId}";
+            Response.Headers[HttpConstants.Headers.LOCATION] = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.OrderId);
             return CreatedAtAction(
                 nameof(GetPurchaseOrderById),
                 new { id = order.OrderId },
@@ -282,8 +284,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
+                type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 status = 400,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -296,15 +298,15 @@ public class PurchaseOrdersController : ControllerBase
     /// POST /api/v1/purchase-orders/{id}/confirm - Confirm purchase order
     /// Authorization: Admin only
     /// </summary>
-    [HttpPost("{id:int}/confirm")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost(ApiRoutes.PurchaseOrders.CONFIRM)]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ConfirmPurchaseOrder(
         int id,
         [FromBody] ConfirmOrderRequest request,
-        [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey,
+        [FromHeader(Name = HttpConstants.Headers.IDEMPOTENCY_KEY)] string? idempotencyKey,
         [FromServices] ConfirmPurchaseOrderCommand command = null!,
         CancellationToken cancellationToken = default)
     {
@@ -343,14 +345,14 @@ public class PurchaseOrdersController : ControllerBase
                     movementId = u.MovementId,
                     _links = new
                     {
-                        stock = new { href = $"/api/v1/inventory/stocks/{u.StockId}" },
-                        movement = new { href = $"/api/v1/inventory/movements/{u.MovementId}" }
+                        stock = new { href = string.Format("/api/v1/inventory/stocks/{0}", u.StockId) },
+                        movement = new { href = string.Format("/api/v1/inventory/movements/{0}", u.MovementId) }
                     }
                 }),
                 _links = new
                 {
-                    self = new { href = $"/api/v1/purchase-orders/{order.Id}" },
-                    inventory = new { href = $"/api/v1/locations/{order.LocationId}/inventory" }
+                    self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) },
+                    inventory = new { href = string.Format("/api/v1/locations/{0}/inventory", order.LocationId) }
                 }
             };
 
@@ -371,8 +373,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
-                title = "Not Found",
+                type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
+                title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 status = 404,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -383,8 +385,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return Conflict(new
             {
-                type = "http://localhost:5000/problems/order-already-reviewed",
-                title = "Order Already Reviewed",
+                type = ProblemDetailsConstants.Types.ORDER_ALREADY_REVIEWED,
+                title = ProblemDetailsConstants.Titles.ORDER_ALREADY_REVIEWED,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -397,8 +399,8 @@ public class PurchaseOrdersController : ControllerBase
     /// POST /api/v1/purchase-orders/{id}/deny - Deny purchase order
     /// Authorization: Admin only
     /// </summary>
-    [HttpPost("{id:int}/deny")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost(ApiRoutes.PurchaseOrders.DENY)]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -433,8 +435,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return NotFound(new
             {
-                type = "http://localhost:5000/problems/not-found",
-                title = "Not Found",
+                type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
+                title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 status = 404,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -445,8 +447,8 @@ public class PurchaseOrdersController : ControllerBase
         {
             return Conflict(new
             {
-                type = "http://localhost:5000/problems/order-already-reviewed",
-                title = "Order Already Reviewed",
+                type = ProblemDetailsConstants.Types.ORDER_ALREADY_REVIEWED,
+                title = ProblemDetailsConstants.Titles.ORDER_ALREADY_REVIEWED,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path.ToString(),
@@ -459,8 +461,8 @@ public class PurchaseOrdersController : ControllerBase
     /// GET /api/v1/purchase-orders/pending - Get pending orders (Admin dashboard)
     /// Authorization: Admin only
     /// </summary>
-    [HttpGet("pending")]
-    [Authorize(Roles = "Admin")]
+    [HttpGet(ApiRoutes.PurchaseOrders.PENDING)]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPendingOrders(
         [FromServices] GetPendingOrdersQuery query = null!,
@@ -483,16 +485,16 @@ public class PurchaseOrdersController : ControllerBase
                 createdAt = po.CreatedAt,
                 _links = new
                 {
-                    self = new { href = $"/api/v1/purchase-orders/{po.Id}" },
+                    self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, po.Id) },
                     confirm = new
                     {
-                        href = $"/api/v1/purchase-orders/{po.Id}/confirm",
-                        method = "POST"
+                        href = string.Format(ApiRoutes.PurchaseOrders.FULL_CONFIRM_TEMPLATE, po.Id),
+                        method = HttpConstants.Methods.POST
                     },
                     deny = new
                     {
-                        href = $"/api/v1/purchase-orders/{po.Id}/deny",
-                        method = "POST"
+                        href = string.Format(ApiRoutes.PurchaseOrders.FULL_DENY_TEMPLATE, po.Id),
+                        method = HttpConstants.Methods.POST
                     }
                 }
             }),

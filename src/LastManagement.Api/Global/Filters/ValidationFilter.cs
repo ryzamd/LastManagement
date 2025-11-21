@@ -1,3 +1,4 @@
+using LastManagement.Api.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -18,8 +19,8 @@ public sealed class ValidationFilter : IAsyncActionFilter
 
             var problemDetails = new ValidationProblemDetails(context.ModelState)
             {
-                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                Title = "One or more validation errors occurred",
+                Type = ProblemDetailsConstants.Types.BAD_REQUEST,
+                Title = ProblemDetailsConstants.Titles.ONE_OR_MORE_VALIDATION_ERRORS,
                 Status = StatusCodes.Status400BadRequest,
                 Instance = context.HttpContext.Request.Path
             };

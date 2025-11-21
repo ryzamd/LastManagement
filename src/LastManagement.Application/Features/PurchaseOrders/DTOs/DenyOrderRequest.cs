@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using LastManagement.Application.Constants;
 
 namespace LastManagement.Application.Features.PurchaseOrders.DTOs;
 
 public sealed class DenyOrderRequest
 {
-    [StringLength(1000, ErrorMessage = "Admin notes must not exceed 1000 characters")]
+    [StringLength(1000, ErrorMessage = ValidationMessages.PurchaseOrder.ADMIN_NOTES_MAX_LENGTH)]
     public string? AdminNotes { get; set; }
 }

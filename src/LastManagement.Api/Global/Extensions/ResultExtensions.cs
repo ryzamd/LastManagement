@@ -1,4 +1,5 @@
-﻿using LastManagement.Application.Common.Models;
+﻿using LastManagement.Api.Constants;
+using LastManagement.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LastManagement.Api.Global.Extensions;
@@ -14,8 +15,8 @@ public static class ResultExtensions
 
         return controller.BadRequest(new ProblemDetails
         {
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-            Title = "Bad Request",
+            Type = ProblemDetailsConstants.Types.BAD_REQUEST,
+            Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
             Status = StatusCodes.Status400BadRequest,
             Detail = result.Error
         });
@@ -30,8 +31,8 @@ public static class ResultExtensions
 
         return controller.BadRequest(new ProblemDetails
         {
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-            Title = "Bad Request",
+            Type = ProblemDetailsConstants.Types.BAD_REQUEST,
+            Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
             Status = StatusCodes.Status400BadRequest,
             Detail = result.Error
         });

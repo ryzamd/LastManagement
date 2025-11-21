@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Api.Global.Extensions;
 using LastManagement.Api.Global.Filters;
 using LastManagement.Api.Global.Middleware;
@@ -42,7 +43,7 @@ builder.Services.AddMappings();
 
 // JWT Authentication
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
-    ?? throw new InvalidOperationException("JWT configuration is missing");
+    ?? throw new InvalidOperationException(LogMessages.Configuration.JWT_MISSING);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -76,7 +77,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(
-                builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>()
+                builder.Configuration.GetSection(ConfigurationKeys.Cors.ALLOWED_ORIGINS).Get<string[]>() ?? Array.Empty<string>()
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -102,12 +103,12 @@ app.UseSerilogRequestLogging();
 
 try
 {
-    Log.Information("Starting Last Management Server");
+    Log.Information(LogMessages.Application.STARTING_SERVER);
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly");
+    Log.Fatal(ex, LogMessages.Application.TERMINATED_UNEXPECTEDLY);
 }
 finally
 {

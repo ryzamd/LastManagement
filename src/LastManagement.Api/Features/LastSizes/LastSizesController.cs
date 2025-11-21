@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using LastManagement.Api.Constants;
 using LastManagement.Application.Features.LastSizes.Commands;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Queries;
@@ -118,7 +119,7 @@ public class LastSizesController : ControllerBase
     /// Create a new last size
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     public async Task<IActionResult> CreateLastSize([FromBody] CreateLastSizeRequest request, [FromServices] CreateLastSizeCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -171,7 +172,7 @@ public class LastSizesController : ControllerBase
             return Conflict(new
             {
                 type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
-                title = "Conflict",
+                Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path,
@@ -199,7 +200,7 @@ public class LastSizesController : ControllerBase
     /// Update a last size
     /// </summary>
     [HttpPatch("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     public async Task<IActionResult> UpdateLastSize(int id, [FromBody] UpdateLastSizeRequest request, [FromServices] UpdateLastSizeCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -261,7 +262,7 @@ public class LastSizesController : ControllerBase
             return Conflict(new
             {
                 type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
-                title = "Conflict",
+                Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path,
@@ -288,7 +289,7 @@ public class LastSizesController : ControllerBase
     /// Delete a last size
     /// </summary>
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     public async Task<IActionResult> DeleteLastSize(int id, [FromServices] DeleteLastSizeCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -313,7 +314,7 @@ public class LastSizesController : ControllerBase
             return Conflict(new
             {
                 type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
-                title = "Conflict",
+                Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path,
@@ -346,7 +347,7 @@ public class LastSizesController : ControllerBase
     /// Create multiple sizes
     /// </summary>
     [HttpPost("$batch")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     public async Task<IActionResult> CreateBatch([FromBody] CreateLastSizeBatchRequest request, [FromServices] CreateLastSizeBatchCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -396,7 +397,7 @@ public class LastSizesController : ControllerBase
     /// Update multiple sizes
     /// </summary>
     [HttpPatch("$batch")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     public async Task<IActionResult> UpdateBatch([FromBody] UpdateLastSizeBatchRequest request, [FromServices] UpdateLastSizeBatchCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -446,7 +447,7 @@ public class LastSizesController : ControllerBase
     /// Delete multiple sizes
     /// </summary>
     [HttpDelete("$batch")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMIN)]
     public async Task<IActionResult> DeleteBatch([FromBody] DeleteLastSizeBatchRequest request, [FromServices] DeleteLastSizeBatchCommand command, CancellationToken cancellationToken = default)
     {
         try
