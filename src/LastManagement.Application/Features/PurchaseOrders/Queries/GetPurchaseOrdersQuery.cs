@@ -1,6 +1,8 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.PurchaseOrders.DTOs;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Domain.PurchaseOrders.Enums;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.PurchaseOrders.Queries;
 
@@ -22,7 +24,7 @@ public sealed class GetPurchaseOrdersQuery
         {
             if (!Enum.TryParse<PurchaseOrderStatus>(status, true, out var parsedStatus))
             {
-                throw new ArgumentException($"Invalid status value: {status}");
+                throw new ArgumentException(StringFormatter.FormatMessage(ErrorMessages.PurchaseOrder.INVALID_STATUS, status));
             }
             statusEnum = parsedStatus;
         }

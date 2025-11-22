@@ -1,8 +1,10 @@
+using LastManagement.Api.Constants;
+
 namespace LastManagement.Api.Global.Options;
 
 public sealed class DatabaseSettings
 {
-    public const string SectionName = "Database";
+    public const string SectionName = ConfigurationKeys.Database.SECTION;
 
     public string ConnectionString { get; set; } = string.Empty;
     public int CommandTimeout { get; set; } = 30;

@@ -7,6 +7,7 @@ using LastManagement.Application.Features.Customers.DTOs;
 using LastManagement.Application.Features.Customers.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace LastManagement.Api.Features.Customers;
 
@@ -51,7 +52,7 @@ public sealed class CustomersController : ControllerBase
         string? filterStatus = null;
         if (!string.IsNullOrEmpty(filter))
         {
-            var match = System.Text.RegularExpressions.Regex.Match(filter, RegexPattern.Customer.GET_CUSTOMERS, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var match = Regex.Match(filter, RegexPattern.Customer.GET_CUSTOMERS, RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 filterStatus = match.Groups[1].Value;
@@ -64,8 +65,8 @@ public sealed class CustomersController : ControllerBase
         if (!result.IsSuccess)
             return BadRequest(result.Error);
 
-        Response.Headers.Append("X-Total-Count", result.Value!.Count.ToString());
-        Response.Headers.CacheControl = "public, max-age=60";
+        Response.Headers.Append(HttpConstants.Headers.X_TOTAL_COUNT, result.Value!.Count.ToString());
+        Response.Headers.CacheControl = CacheConstants.CacheControl.PUBLIC_MAX_AGE_60;
 
         return Ok(result.Value);
     }
@@ -90,13 +91,13 @@ public sealed class CustomersController : ControllerBase
                 Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 Status = StatusCodes.Status404NotFound,
                 Detail = result.Error,
-                Instance = $"/api/v1/customers/{id}"
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
             });
         }
 
         var etag = ETagHelper.Generate(result.Value!.Version);
         Response.Headers.ETag = etag;
-        Response.Headers.CacheControl = "public, max-age=60";
+        Response.Headers.CacheControl = CacheConstants.CacheControl.PUBLIC_MAX_AGE_60;
 
         return Ok(result.Value);
     }
@@ -124,7 +125,7 @@ public sealed class CustomersController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.DUPLICATE_RESOURCE,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
-                    Instance = "/api/v1/customers"
+                    Instance = ApiRoutes.Customers.FULL_BASE
                 });
             }
             return BadRequest(result.Error);
@@ -132,7 +133,7 @@ public sealed class CustomersController : ControllerBase
 
         var etag = ETagHelper.Generate(result.Value!.Version);
         Response.Headers.ETag = etag;
-        Response.Headers.Location = $"/api/v1/customers/{result.Value.Id}";
+        Response.Headers.Location = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, result.Value.Id);
 
         return CreatedAtAction(
             nameof(GetCustomerById),
@@ -148,7 +149,7 @@ public sealed class CustomersController : ControllerBase
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]
-    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] UpdateCustomerRequest request, [FromHeader(Name = "If-Match")] string? ifMatch, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] UpdateCustomerRequest request, [FromHeader(Name = HttpConstants.Headers.IF_MATCH)] string? ifMatch, CancellationToken cancellationToken)
     {
         // Parse version from ETag
         var expectedVersion = ETagHelper.ParseVersion(ifMatch);
@@ -160,7 +161,7 @@ public sealed class CustomersController : ControllerBase
                 Title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 Status = StatusCodes.Status400BadRequest,
                 Detail = ProblemDetailsConstants.Details.IF_MATCH_HEADER_REQUIRED_ETAG,
-                Instance = $"/api/v1/customers/{id}"
+                Instance = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
             });
         }
 
@@ -182,7 +183,7 @@ public sealed class CustomersController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
-                    Instance = $"/api/v1/customers/{id}"
+                    Instance = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 
@@ -194,7 +195,7 @@ public sealed class CustomersController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
                     Status = StatusCodes.Status412PreconditionFailed,
                     Detail = result.Error,
-                    Instance = $"/api/v1/customers/{id}"
+                    Instance = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 
@@ -206,7 +207,7 @@ public sealed class CustomersController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.DUPLICATE_RESOURCE,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
-                    Instance = $"/api/v1/customers/{id}"
+                    Instance = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 
@@ -242,7 +243,7 @@ public sealed class CustomersController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
-                    Instance = $"/api/v1/customers/{id}"
+                    Instance = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 
@@ -254,7 +255,7 @@ public sealed class CustomersController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.CONFLICT,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
-                    Instance = $"/api/v1/customers/{id}"
+                    Instance = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 

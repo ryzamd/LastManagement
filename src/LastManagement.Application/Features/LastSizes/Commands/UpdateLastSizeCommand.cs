@@ -1,7 +1,9 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Domain.LastSizes;
 using LastManagement.Domain.LastSizes.Enums;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.LastSizes.Commands;
 
@@ -17,7 +19,7 @@ public class UpdateLastSizeCommand
     public async Task<LastSize> ExecuteAsync(int sizeId, UpdateLastSizeRequest request, CancellationToken cancellationToken = default)
     {
         var lastSize = await _repository.GetByIdAsync(sizeId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Last size with ID {sizeId} not found");
+            ?? throw new KeyNotFoundException(StringFormatter.FormatMessage(ErrorMessages.LastSize.NOT_FOUND, sizeId));
 
         // Update label if provided
         if (!string.IsNullOrWhiteSpace(request.SizeLabel))
@@ -42,7 +44,7 @@ public class UpdateLastSizeCommand
                     var replacementSize = await _repository.GetByIdAsync(request.ReplacementSizeId.Value, cancellationToken);
                     if (replacementSize == null)
                     {
-                        throw new InvalidOperationException($"Replacement size with ID {request.ReplacementSizeId.Value} not found");
+                        throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.LastSize.NOT_FOUND, request.ReplacementSizeId.Value));
                     }
                 }
 

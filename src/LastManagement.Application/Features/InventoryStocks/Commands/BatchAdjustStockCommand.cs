@@ -1,6 +1,8 @@
 
+using LastManagement.Api.Constants;
 using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
+using LastManagement.Utilities.Constants.Global;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Application.Features.InventoryStocks.Commands;
@@ -46,7 +48,7 @@ public class BatchAdjustStockCommand
                 result.Results.Add(new InventoryStockBatchItemResult
                 {
                     StockId = operation.StockId,
-                    Status = "success",
+                    Status = StatusContants.SUCCESS,
                     MovementId = adjustResult.MovementId,
                     NewQuantity = adjustResult.NewQuantityGood
                 });
@@ -57,11 +59,11 @@ public class BatchAdjustStockCommand
                 result.Results.Add(new InventoryStockBatchItemResult
                 {
                     StockId = operation.StockId,
-                    Status = "error",
+                    Status = StatusContants.ERROR,
                     Error = new InventoryStockBatchError
                     {
-                        Type = "http://localhost:5000/problems/precondition-failed",
-                        Title = "Concurrency Conflict",
+                        Type = ProblemDetailsConstants.Types.PRECONDITION_FAILED,
+                        Title = ProblemDetailsConstants.Titles.CONCURRENCY_CONFLICT,
                         Status = 412,
                         Detail = ex.Message
                     }
@@ -73,13 +75,11 @@ public class BatchAdjustStockCommand
                 result.Results.Add(new InventoryStockBatchItemResult
                 {
                     StockId = operation.StockId,
-                    Status = "error",
+                    Status = StatusContants.ERROR,
                     Error = new InventoryStockBatchError
                     {
-                        Type = ex is InvalidOperationException
-                            ? "http://localhost:5000/problems/insufficient-stock"
-                            : "http://localhost:5000/problems/validation-error",
-                        Title = ex is InvalidOperationException ? "Insufficient Stock" : "Validation Error",
+                        Type = ex is InvalidOperationException ? ProblemDetailsConstants.Types.INSUFFICIENT_STOCK : ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                        Title = ex is InvalidOperationException ? ProblemDetailsConstants.Titles.INSUFFICIENT_STOCK : ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                         Status = 400,
                         Detail = ex.Message
                     }

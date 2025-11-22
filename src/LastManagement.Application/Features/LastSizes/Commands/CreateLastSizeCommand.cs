@@ -1,6 +1,8 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Domain.LastSizes;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.LastSizes.Commands;
 
@@ -18,7 +20,7 @@ public class CreateLastSizeCommand
         // Check for duplicate size value
         if (await _repository.ExistsAsync(request.SizeValue, cancellationToken))
         {
-            throw new InvalidOperationException($"Size value {request.SizeValue} already exists");
+            throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.LastSize.ALREADY_EXISTS, request.SizeValue, request.SizeLabel));
         }
 
         var lastSize = LastSize.Create(request.SizeValue, request.SizeLabel);

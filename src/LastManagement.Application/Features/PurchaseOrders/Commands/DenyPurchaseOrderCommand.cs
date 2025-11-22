@@ -1,6 +1,8 @@
 using LastManagement.Application.Common.Interfaces;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.PurchaseOrders.DTOs;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.PurchaseOrders.Commands;
 
@@ -20,7 +22,7 @@ public sealed class DenyPurchaseOrderCommand
         var order = await _orderRepository.GetByIdForUpdateAsync(orderId, cancellationToken);
         if (order == null)
         {
-            throw new InvalidOperationException($"Purchase order with ID {orderId} not found");
+            throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.PurchaseOrder.NOT_FOUND, orderId));
         }
 
         // Deny order (validates status is Pending)

@@ -1,6 +1,8 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastNames.DTOs;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Domain.LastNames.Enums;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.LastNames.Queries;
 
@@ -21,10 +23,12 @@ public class GetLastNamesQuery
         CancellationToken cancellationToken = default)
     {
         LastNameStatus? status = null;
+
         if (!string.IsNullOrWhiteSpace(statusFilter))
         {
             if (!Enum.TryParse<LastNameStatus>(statusFilter, true, out var parsedStatus))
-                throw new ArgumentException($"Invalid status value: {statusFilter}");
+                throw new ArgumentException(StringFormatter.FormatMessage(ErrorMessages.LastName.INVALID_STATUS, statusFilter));
+
             status = parsedStatus;
         }
 

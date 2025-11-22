@@ -1,6 +1,8 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Domain.PurchaseOrders.Entities;
 using LastManagement.Domain.PurchaseOrders.Enums;
+using LastManagement.Utilities.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Infrastructure.Persistence.Repositories;
@@ -72,7 +74,7 @@ public sealed class PurchaseOrderRepository : IPurchaseOrderRepository
     {
         return await _context.PurchaseOrdersRepository
             .AsNoTracking()
-            .Where(po => po.OrderNumber.StartsWith($"PO-{datePrefix}"))
+            .Where(po => po.OrderNumber.StartsWith(StringFormatter.FormatValidation(FormatConstants.PurchaseOrder.ORDER_NUMBER_PREFIX, datePrefix)))
             .OrderByDescending(po => po.OrderNumber)
             .Select(po => po.OrderNumber)
             .FirstOrDefaultAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 
 namespace LastManagement.Domain.PurchaseOrders.Entities;
 
@@ -14,13 +15,13 @@ public sealed class IdempotencyKey : Entity
     public static IdempotencyKey Create(string key, string result, DateTime expiresAt)
     {
         if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentException("Key cannot be empty", nameof(key));
+            throw new ArgumentException(DomainValidationMessages.IdempotencyKey.KEY_EMPTY, nameof(key));
 
         if (string.IsNullOrWhiteSpace(result))
-            throw new ArgumentException("Result cannot be empty", nameof(result));
+            throw new ArgumentException(DomainValidationMessages.IdempotencyKey.RESULT_EMPTY, nameof(result));
 
         if (expiresAt <= DateTime.UtcNow)
-            throw new ArgumentException("Expiration must be in the future", nameof(expiresAt));
+            throw new ArgumentException(DomainValidationMessages.IdempotencyKey.EXPIRATION_FUTURE, nameof(expiresAt));
 
         return new IdempotencyKey
         {

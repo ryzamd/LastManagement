@@ -1,4 +1,5 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 using LastManagement.Domain.LastNames.Enums;
 
 namespace LastManagement.Domain.LastNames.Entities;
@@ -20,13 +21,13 @@ public class LastName : Entity
     public static LastName Create(int customerId, string lastCode)
     {
         if (customerId <= 0)
-            throw new ArgumentException("Customer ID must be positive", nameof(customerId));
+            throw new ArgumentException(DomainValidationMessages.LastName.CUSTOMER_ID_POSITIVE, nameof(customerId));
 
         if (string.IsNullOrWhiteSpace(lastCode))
-            throw new ArgumentException("Last code cannot be empty", nameof(lastCode));
+            throw new ArgumentException(DomainValidationMessages.LastName.CODE_EMPTY, nameof(lastCode));
 
         if (lastCode.Length > 50)
-            throw new ArgumentException("Last code cannot exceed 50 characters", nameof(lastCode));
+            throw new ArgumentException(DomainValidationMessages.LastName.CODE_EXCEEDS_LENGTH, nameof(lastCode));
 
         return new LastName
         {
@@ -42,7 +43,8 @@ public class LastName : Entity
     public void UpdateStatus(LastNameStatus newStatus, string? discontinueReason = null)
     {
         if (newStatus != LastNameStatus.Active && string.IsNullOrWhiteSpace(discontinueReason))
-            throw new ArgumentException("Discontinue reason is required when status is not Active");
+            throw new ArgumentException(DomainValidationMessages.LastName.DISCONTINUE_REASON_REQUIRED);
+
 
         Status = newStatus;
         DiscontinueReason = newStatus == LastNameStatus.Active ? null : discontinueReason;
@@ -53,10 +55,10 @@ public class LastName : Entity
     public void TransferToCustomer(int newCustomerId)
     {
         if (newCustomerId <= 0)
-            throw new ArgumentException("Customer ID must be positive", nameof(newCustomerId));
+            throw new ArgumentException(DomainValidationMessages.LastName.CUSTOMER_ID_POSITIVE, nameof(newCustomerId));
 
         if (newCustomerId == CustomerId)
-            throw new InvalidOperationException("Cannot transfer to the same customer");
+            throw new InvalidOperationException(DomainValidationMessages.LastName.CANNOT_TRANSFER_SAME_CUSTOMER);
 
         CustomerId = newCustomerId;
         UpdatedAt = DateTime.UtcNow;
@@ -66,10 +68,10 @@ public class LastName : Entity
     public void UpdateLastCode(string newLastCode)
     {
         if (string.IsNullOrWhiteSpace(newLastCode))
-            throw new ArgumentException("Last code cannot be empty", nameof(newLastCode));
+            throw new ArgumentException(DomainValidationMessages.LastName.CODE_EMPTY, nameof(newLastCode));
 
         if (newLastCode.Length > 50)
-            throw new ArgumentException("Last code cannot exceed 50 characters", nameof(newLastCode));
+            throw new ArgumentException(DomainValidationMessages.LastName.CODE_EXCEEDS_LENGTH, nameof(newLastCode));
 
         LastCode = newLastCode.Trim();
         UpdatedAt = DateTime.UtcNow;

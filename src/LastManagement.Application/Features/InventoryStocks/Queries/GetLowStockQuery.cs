@@ -1,3 +1,5 @@
+using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
 
@@ -27,10 +29,10 @@ public class GetLowStockQuery
             RecommendedRestock = CalculateRestock(r.AvailableQuantity, threshold),
             Links = new Dictionary<string, object>
             {
-                { "stock", new { href = $"/api/v1/inventory/stocks/{r.StockId}" } },
+                { "stock", new { href = UrlHelper.FormatResourceUrl(ApiRoutes.Inventory.FULL_BY_ID_TEMPLATE, r.StockId) } },
                 { "createOrder", new
                     {
-                        href = "/api/v1/purchase-orders",
+                        href = ApiRoutes.PurchaseOrders.FULL_BASE,
                         method = "POST"
                     }
                 }

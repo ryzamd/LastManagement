@@ -1,5 +1,6 @@
 using LastManagement.Application.Features.Customers.Interfaces;
 using LastManagement.Domain.Customers;
+using LastManagement.Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Infrastructure.Persistence.Repositories;
@@ -42,10 +43,10 @@ public sealed class CustomerRepository : ICustomerRepository
         // Order by
         query = orderBy?.ToLower() switch
         {
-            "customername asc" => query.OrderBy(c => c.CustomerName),
-            "customername desc" => query.OrderByDescending(c => c.CustomerName),
-            "createdat desc" => query.OrderByDescending(c => c.CreatedAt),
-            "createdat asc" => query.OrderBy(c => c.CreatedAt),
+            RepositoryConstants.SortFields.CUSTOMER_NAME_ASC => query.OrderBy(c => c.CustomerName),
+            RepositoryConstants.SortFields.CUSTOMER_NAME_DESC => query.OrderByDescending(c => c.CustomerName),
+            RepositoryConstants.SortFields.CREATED_AT_DESC => query.OrderByDescending(c => c.CreatedAt),
+            RepositoryConstants.SortFields.CREATED_AT_ASC => query.OrderBy(c => c.CreatedAt),
             _ => query.OrderBy(c => c.Id) // Default
         };
 

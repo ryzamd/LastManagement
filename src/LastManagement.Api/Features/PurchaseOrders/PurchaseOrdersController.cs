@@ -1,11 +1,15 @@
 using Asp.Versioning;
 using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Common.Interfaces;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.PurchaseOrders.Commands;
 using LastManagement.Application.Features.PurchaseOrders.DTOs;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Application.Features.PurchaseOrders.Queries;
 using LastManagement.Domain.PurchaseOrders.Enums;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -83,23 +87,23 @@ public class PurchaseOrdersController : ControllerBase
                     reviewedBy = po.ReviewedBy,
                     _links = new
                     {
-                        self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, po.Id) },
-                        items = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_WITH_ITEMS_TEMPLATE, po.Id) },
+                        self = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, po.Id) },
+                        items = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_WITH_ITEMS_TEMPLATE, po.Id) },
                         confirm = po.Status == nameof(PurchaseOrderStatus.Pending) && isAdmin ? new
                         {
-                            href = string.Format(ApiRoutes.PurchaseOrders.FULL_CONFIRM_TEMPLATE, po.Id),
+                            href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_CONFIRM_TEMPLATE, po.Id),
                             method = HttpConstants.Methods.POST,
                             requires = new[] { AuthorizationConstants.Roles.ADMIN }
                         } : null,
                         deny = po.Status == nameof(PurchaseOrderStatus.Pending) && isAdmin ? new
                         {
-                            href = string.Format(ApiRoutes.PurchaseOrders.FULL_DENY_TEMPLATE, po.Id),
+                            href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_DENY_TEMPLATE, po.Id),
                             method = HttpConstants.Methods.POST,
                             requires = new[] { AuthorizationConstants.Roles.ADMIN }
                         } : null
                     }
                 }),
-                _atNextLink = nextId.HasValue ? string.Format(ApiRoutes.PurchaseOrders.FULL_PAGINATION_TEMPLATE, limit, nextId.Value) : null,
+                _atNextLink = nextId.HasValue ? UrlHelper.FormatNextLink(ApiRoutes.PurchaseOrders.FULL_PAGINATION_TEMPLATE, limit, nextId.Value) : null,
                 _atCount = totalCount
             };
 
@@ -113,7 +117,7 @@ public class PurchaseOrdersController : ControllerBase
                 title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 status = 400,
                 detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -137,12 +141,12 @@ public class PurchaseOrdersController : ControllerBase
         {
             return NotFound(new
             {
-                type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
-                title = ProblemDetailsConstants.Titles.NOT_FOUND,
-                status = 404,
-                detail = $"Purchase order with ID {id} not found",
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = StringFormatter.FormatMessage(ErrorMessages.PurchaseOrder.NOT_FOUND, id),
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
@@ -171,8 +175,8 @@ public class PurchaseOrdersController : ControllerBase
                 quantityRequested = item.QuantityRequested,
                 _links = new
                 {
-                    last = new { href = string.Format(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, item.LastId) },
-                    size = new { href = string.Format(ApiRoutes.LastSizes.FULL_BY_ID_TEMPLATE, item.SizeId) }
+                    last = new { href = UrlHelper.FormatInstancePath(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, item.LastId) },
+                    size = new { href = UrlHelper.FormatInstancePath(ApiRoutes.LastSizes.FULL_BY_ID_TEMPLATE, item.SizeId) }
                 }
             }) : null,
             summary = new
@@ -182,9 +186,9 @@ public class PurchaseOrdersController : ControllerBase
             },
             _links = new
             {
-                self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) },
-                location = new { href = string.Format(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, order.LocationId) },
-                inventory = new { href = string.Format("/api/v1/inventory/stocks?$filter=locationId eq {0}", order.LocationId) }
+                self = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) },
+                location = new { href = UrlHelper.FormatInstancePath(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, order.LocationId) },
+                inventory = new { href = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_STOCKS_FILTER_TEMPLATE, order.LocationId) }
             }
         };
 
@@ -219,12 +223,12 @@ public class PurchaseOrdersController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "http://localhost:5000/problems/validation-error",
-                    title = "Validation Error",
-                    status = 400,
-                    errors,
-                    instance = HttpContext.Request.Path.ToString(),
-                    traceId = HttpContext.TraceIdentifier
+                    Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                    Sitle = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                    Status = 400,
+                    Detail = errors,
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier
                 });
             }
 
@@ -259,7 +263,7 @@ public class PurchaseOrdersController : ControllerBase
                 }),
                 _links = new
                 {
-                    self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.OrderId) }
+                    self = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.OrderId) }
                 }
             };
 
@@ -274,7 +278,7 @@ public class PurchaseOrdersController : ControllerBase
                     cancellationToken);
             }
 
-            Response.Headers[HttpConstants.Headers.LOCATION] = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.OrderId);
+            Response.Headers.Location = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.OrderId);
             return CreatedAtAction(
                 nameof(GetPurchaseOrderById),
                 new { id = order.OrderId },
@@ -284,12 +288,12 @@ public class PurchaseOrdersController : ControllerBase
         {
             return BadRequest(new
             {
-                type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
-                title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
-                status = 400,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -323,7 +327,7 @@ public class PurchaseOrdersController : ControllerBase
                 }
             }
 
-            var reviewedBy = _currentUserService.Username ?? "admin";
+            var reviewedBy = _currentUserService.Username ?? RoleConstants.ADMIN;
             var (order, inventoryUpdates) = await command.ExecuteAsync(id, reviewedBy, request, cancellationToken);
 
             var response = new
@@ -345,14 +349,14 @@ public class PurchaseOrdersController : ControllerBase
                     movementId = u.MovementId,
                     _links = new
                     {
-                        stock = new { href = string.Format("/api/v1/inventory/stocks/{0}", u.StockId) },
-                        movement = new { href = string.Format("/api/v1/inventory/movements/{0}", u.MovementId) }
+                        stock = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, u.StockId) },
+                        movement = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_MOVEMENT_TEMPLATE, u.MovementId) }
                     }
                 }),
                 _links = new
                 {
-                    self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) },
-                    inventory = new { href = string.Format("/api/v1/locations/{0}/inventory", order.LocationId) }
+                    self = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) },
+                    inventory = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_LOCATION_FILTER_TEMPLATE, order.LocationId) }
                 }
             };
 
@@ -373,24 +377,24 @@ public class PurchaseOrdersController : ControllerBase
         {
             return NotFound(new
             {
-                type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
-                title = ProblemDetailsConstants.Titles.NOT_FOUND,
-                status = 404,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("status"))
         {
             return Conflict(new
             {
-                type = ProblemDetailsConstants.Types.ORDER_ALREADY_REVIEWED,
-                title = ProblemDetailsConstants.Titles.ORDER_ALREADY_REVIEWED,
-                status = 409,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.ORDER_ALREADY_REVIEWED,
+                Title = ProblemDetailsConstants.Titles.ORDER_ALREADY_REVIEWED,
+                Status = 409,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -412,7 +416,7 @@ public class PurchaseOrdersController : ControllerBase
     {
         try
         {
-            var reviewedBy = _currentUserService.Username ?? "admin";
+            var reviewedBy = _currentUserService.Username ?? RoleConstants.ADMIN;
             var order = await command.ExecuteAsync(id, reviewedBy, request, cancellationToken);
 
             var response = new
@@ -425,7 +429,7 @@ public class PurchaseOrdersController : ControllerBase
                 adminNotes = order.AdminNotes,
                 _links = new
                 {
-                    self = new { href = $"/api/v1/purchase-orders/{order.Id}" }
+                    self = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, order.Id) }
                 }
             };
 
@@ -435,24 +439,24 @@ public class PurchaseOrdersController : ControllerBase
         {
             return NotFound(new
             {
-                type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
-                title = ProblemDetailsConstants.Titles.NOT_FOUND,
-                status = 404,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.NOT_FOUND_ERROR,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("status"))
         {
             return Conflict(new
             {
-                type = ProblemDetailsConstants.Types.ORDER_ALREADY_REVIEWED,
-                title = ProblemDetailsConstants.Titles.ORDER_ALREADY_REVIEWED,
-                status = 409,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.ORDER_ALREADY_REVIEWED,
+                Title = ProblemDetailsConstants.Titles.ORDER_ALREADY_REVIEWED,
+                Status = 409,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -485,15 +489,15 @@ public class PurchaseOrdersController : ControllerBase
                 createdAt = po.CreatedAt,
                 _links = new
                 {
-                    self = new { href = string.Format(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, po.Id) },
+                    self = new { href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_BY_ID_TEMPLATE, po.Id) },
                     confirm = new
                     {
-                        href = string.Format(ApiRoutes.PurchaseOrders.FULL_CONFIRM_TEMPLATE, po.Id),
+                        href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_CONFIRM_TEMPLATE, po.Id),
                         method = HttpConstants.Methods.POST
                     },
                     deny = new
                     {
-                        href = string.Format(ApiRoutes.PurchaseOrders.FULL_DENY_TEMPLATE, po.Id),
+                        href = UrlHelper.FormatInstancePath(ApiRoutes.PurchaseOrders.FULL_DENY_TEMPLATE, po.Id),
                         method = HttpConstants.Methods.POST
                     }
                 }

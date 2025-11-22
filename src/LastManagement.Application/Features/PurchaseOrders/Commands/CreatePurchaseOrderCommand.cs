@@ -1,10 +1,12 @@
 using LastManagement.Application.Common.Interfaces;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Application.Features.Locations.Interfaces;
 using LastManagement.Application.Features.PurchaseOrders.DTOs;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Domain.PurchaseOrders.Entities;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.PurchaseOrders.Commands;
 
@@ -39,7 +41,7 @@ public sealed class CreatePurchaseOrderCommand
         var locationExists = await _locationRepository.ExistsAsync(request.LocationId, cancellationToken);
         if (!locationExists)
         {
-            throw new InvalidOperationException($"Location with ID {request.LocationId} does not exist");
+            throw new InvalidOperationException(StringFormatter.FormatError(ErrorMessages.Location.DOES_NOT_EXIST, request.LocationId));
         }
 
         // Validate all lasts and sizes exist
@@ -48,18 +50,18 @@ public sealed class CreatePurchaseOrderCommand
             var lastExists = await _lastNameRepository.ExistsAsync(item.LastId, cancellationToken);
             if (!lastExists)
             {
-                throw new InvalidOperationException($"Last with ID {item.LastId} does not exist");
+                throw new InvalidOperationException(StringFormatter.FormatError(ErrorMessages.LastName.DOES_NOT_EXIST, item.LastId));
             }
 
             var sizeExists = await _sizeRepository.ExistsSizeIdAsync(item.SizeId, cancellationToken);
             if (!sizeExists)
             {
-                throw new InvalidOperationException($"Size with ID {item.SizeId} does not exist");
+                throw new InvalidOperationException(StringFormatter.FormatError(ErrorMessages.Size.DOES_NOT_EXIST, item.SizeId));
             }
         }
 
         // Generate order number
-        var today = DateTime.UtcNow.ToString("yyyyMMdd");
+        var today = DateTime.UtcNow.ToString(FormatConstants.DateTime.DATE_ONLY_FORMAT);
         var lastOrderNumber = await _orderRepository.GetLastOrderNumberForDateAsync(today, cancellationToken);
 
         int sequence = 1;
@@ -69,12 +71,12 @@ public sealed class CreatePurchaseOrderCommand
             sequence = lastSequence + 1;
         }
 
-        if (sequence > 99999)
+        if (sequence > FormatConstants.PurchaseOrder.MAX_SEQUENCE_PER_DAY)
         {
-            throw new InvalidOperationException("Maximum orders per day (99999) exceeded");
+            throw new InvalidOperationException(ErrorMessages.PurchaseOrder.MAX_ORDERS_EXCEEDED);
         }
 
-        var orderNumber = $"PO-{today}-{sequence:D5}";
+        var orderNumber = StringFormatter.FormatValidation(FormatConstants.PurchaseOrder.ORDER_NUMBER_TEMPLATE, today, sequence);
 
         // Create order
         var order = PurchaseOrder.Create(

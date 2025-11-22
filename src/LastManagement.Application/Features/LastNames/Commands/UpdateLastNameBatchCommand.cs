@@ -1,6 +1,10 @@
+using LastManagement.Api.Constants;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastNames.DTOs;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Domain.LastNames.Enums;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Application.Features.LastNames.Commands;
@@ -31,13 +35,13 @@ public class UpdateLastNameBatchCommand
                     result.Results.Add(new LastNamesBatchItemResult
                     {
                         Id = operation.Id,
-                        Status = "error",
+                        Status = StatusContants.ERROR,
                         Error = new LastNamesBatchError
                         {
-                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                            Title = "Not Found",
+                            Type = ProblemDetailsConstants.Types.RFC_NOT_FOUND,
+                            Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                             Status = 404,
-                            Detail = $"Last name with ID {operation.Id} not found"
+                            Detail = StringFormatter.FormatMessage(ErrorMessages.LastName.NOT_FOUND, operation.Id)
                         }
                     });
                     continue;
@@ -52,13 +56,13 @@ public class UpdateLastNameBatchCommand
                         result.Results.Add(new LastNamesBatchItemResult
                         {
                             Id = operation.Id,
-                            Status = "error",
+                            Status = StatusContants.ERROR,
                             Error = new LastNamesBatchError
                             {
-                                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                                Title = "Bad Request",
+                                Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                                Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
                                 Status = 400,
-                                Detail = $"Invalid status value: {operation.Patch.Status}"
+                                Detail = StringFormatter.FormatMessage(ErrorMessages.LastName.INVALID_STATUS, operation.Patch.Status)
                             }
                         });
                         continue;
@@ -79,7 +83,7 @@ public class UpdateLastNameBatchCommand
                 result.Results.Add(new LastNamesBatchItemResult
                 {
                     Id = operation.Id,
-                    Status = "success",
+                    Status = StatusContants.SUCCESS,
                     Resource = new
                     {
                         id = lastName.LastId,
@@ -95,13 +99,13 @@ public class UpdateLastNameBatchCommand
                 result.Results.Add(new LastNamesBatchItemResult
                 {
                     Id = operation.Id,
-                    Status = "error",
+                    Status = StatusContants.ERROR,
                     Error = new LastNamesBatchError
                     {
-                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.13",
-                        Title = "Precondition Failed",
+                        Type = ProblemDetailsConstants.Types.RFC_PRECONDITION_FAILED,
+                        Title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
                         Status = 412,
-                        Detail = "The resource was modified by another request. Please refresh and retry."
+                        Detail = ErrorMessages.LastName.RESOURCE_WAS_MODIFIED_BY_ANOTHER_REQUEST
                     }
                 });
             }
@@ -111,11 +115,11 @@ public class UpdateLastNameBatchCommand
                 result.Results.Add(new LastNamesBatchItemResult
                 {
                     Id = operation.Id,
-                    Status = "error",
+                    Status = StatusContants.ERROR,
                     Error = new LastNamesBatchError
                     {
-                        Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                        Title = "Internal Server Error",
+                        Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                        Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                         Status = 500,
                         Detail = ex.Message
                     }

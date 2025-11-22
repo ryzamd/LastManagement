@@ -87,4 +87,10 @@ public static class ValidationMessages
         public const string PASSWORD_MIN_LENGTH = "Password must be at least 6 characters";
         public const string REFRESH_TOKEN_REQUIRED = "Refresh token is required";
     }
+
+    public static class Common
+    {
+        public const string POSITIVE_INTEGER_REQUIRED = "Must be a positive integer";
+        public const string ID_MUST_BE_POSITIVE = "{0} ID must be a positive integer";
+    }
 }

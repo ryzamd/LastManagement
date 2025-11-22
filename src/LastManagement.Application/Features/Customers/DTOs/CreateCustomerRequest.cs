@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using LastManagement.Application.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace LastManagement.Application.Features.Customers.DTOs;
 
@@ -10,6 +10,6 @@ public sealed record CreateCustomerRequest
     public string CustomerName { get; init; } = string.Empty;
 
     [Required(ErrorMessage = ValidationMessages.Customer.STATUS_REQUIRED)]
-    [RegularExpression("^(Active|Inactive|Suspended)$", ErrorMessage = ValidationMessages.Customer.STATUS_INVALID)]
-    public string Status { get; init; } = "Active";
+    [RegularExpression(FormatConstants.RegexPatterns.CUSTOMER_STATUS, ErrorMessage = ValidationMessages.Customer.STATUS_INVALID)]
+    public string Status { get; init; } = StatusConstants.Customer.ACTIVE;
 }

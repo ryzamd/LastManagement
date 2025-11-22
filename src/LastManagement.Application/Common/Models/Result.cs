@@ -1,3 +1,5 @@
+using LastManagement.Utilities.Constants.Global;
+
 namespace LastManagement.Application.Common.Models;
 
 public class Result
@@ -8,10 +10,10 @@ public class Result
     protected Result(bool isSuccess, string? error)
     {
         if (isSuccess && error != null)
-            throw new InvalidOperationException("Success result cannot have error");
+            throw new InvalidOperationException(ResultMessages.Common.SUCCESS_FAILURE_ERROR_MISMATCH);
 
         if (!isSuccess && error == null)
-            throw new InvalidOperationException("Failure result must have error");
+            throw new InvalidOperationException(ResultMessages.Common.FAILURE_REQUIRES_ERROR);
 
         IsSuccess = isSuccess;
         Error = error;

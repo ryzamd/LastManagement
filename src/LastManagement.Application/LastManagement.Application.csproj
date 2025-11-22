@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LastManagement.Domain\LastManagement.Domain.csproj" />
+    <ProjectReference Include="..\LastManagement.Utilities\LastManagement.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

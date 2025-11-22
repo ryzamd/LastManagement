@@ -1,5 +1,9 @@
+using LastManagement.Api.Constants;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Interfaces;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.LastSizes.Commands;
 
@@ -28,13 +32,13 @@ public class DeleteLastSizeBatchCommand
                     result.Results.Add(new BatchItemResult
                     {
                         Id = sizeId,
-                        Status = "error",
+                        Status = StatusContants.ERROR,
                         Error = new BatchError
                         {
-                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                            Title = "Not Found",
+                            Type = ProblemDetailsConstants.Types.RFC_NOT_FOUND,
+                            Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                             Status = 404,
-                            Detail = $"Last size with ID {sizeId} not found"
+                            Detail = StringFormatter.FormatMessage(ErrorMessages.LastSize.NOT_FOUND, sizeId)
                         }
                     });
                     continue;
@@ -47,16 +51,16 @@ public class DeleteLastSizeBatchCommand
                     result.Results.Add(new BatchItemResult
                     {
                         Id = sizeId,
-                        Status = "error",
+                        Status = StatusContants.ERROR,
                         Error = new BatchError
                         {
-                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
-                            Title = "Conflict",
+                            Type = ProblemDetailsConstants.Types.RFC_CONFLICT,
+                            Title = ProblemDetailsConstants.Titles.CONFLICT,
                             Status = 409,
-                            Detail = "Size is in use in inventory",
+                            Detail = ErrorMessages.LastSize.SIZE_IS_IN_USE,
                             AdditionalData = new Dictionary<string, object>
                             {
-                                ["conflictReason"] = "has-inventory",
+                                ["conflictReason"] = ConflictMessages.Reasons.HAS_INVENTORY,
                                 ["sizeValue"] = lastSize.SizeValue,
                                 ["sizeLabel"] = lastSize.SizeLabel
                             }
@@ -71,7 +75,7 @@ public class DeleteLastSizeBatchCommand
                 result.Results.Add(new BatchItemResult
                 {
                     Id = sizeId,
-                    Status = "success"
+                    Status = StatusContants.SUCCESS,
                 });
             }
             catch (Exception ex)
@@ -80,11 +84,11 @@ public class DeleteLastSizeBatchCommand
                 result.Results.Add(new BatchItemResult
                 {
                     Id = sizeId,
-                    Status = "error",
+                    Status = StatusContants.ERROR,
                     Error = new BatchError
                     {
-                        Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                        Title = "Internal Server Error",
+                        Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                        Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                         Status = 500,
                         Detail = ex.Message
                     }

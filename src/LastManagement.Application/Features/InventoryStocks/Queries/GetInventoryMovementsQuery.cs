@@ -1,5 +1,9 @@
-﻿using LastManagement.Application.Features.InventoryStocks.DTOs;
+﻿using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
+using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
+using LastManagement.Utilities.Constants.Global;
+using System.Text;
 
 namespace LastManagement.Application.Features.InventoryStocks.Queries;
 
@@ -41,9 +45,9 @@ public class GetInventoryMovementsQuery
         {
             Id = m.MovementId,
             LastId = m.LastId,
-            LastCode = lasts.GetValueOrDefault(m.LastId, "UNKNOWN"),
+            LastCode = lasts.GetValueOrDefault(m.LastId, CommonConstants.UNKNOWN_VALUE),
             SizeId = m.SizeId,
-            SizeLabel = sizes.GetValueOrDefault(m.SizeId, "UNKNOWN"),
+            SizeLabel = sizes.GetValueOrDefault(m.SizeId, CommonConstants.UNKNOWN_VALUE),
             FromLocationId = m.FromLocationId,
             FromLocationName = m.FromLocationId.HasValue ? locations!.GetValueOrDefault(m.FromLocationId.Value, null) : null,
             ToLocationId = m.ToLocationId,
@@ -56,8 +60,8 @@ public class GetInventoryMovementsQuery
             CreatedBy = m.CreatedBy,
             Links = new Dictionary<string, object>
             {
-                { "self", new { href = $"/api/v1/inventory/movements/{m.MovementId}" } },
-                { "last", new { href = $"/api/v1/last-names/{m.LastId}" } }
+                { "self", new { href = UrlHelper.FormatResourceUrl(ApiRoutes.Inventory.FULL_MOVEMENTS_BY_ID, m.MovementId) } },
+                { "last", new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, m.LastId) } }
             }
         }).ToList();
 
@@ -65,8 +69,7 @@ public class GetInventoryMovementsQuery
         if (dtos.Count == limit)
         {
             var lastItem = movementsList.Last();
-            nextCursor = Convert.ToBase64String(
-                System.Text.Encoding.UTF8.GetBytes($"{lastItem.MovementId}"));
+            nextCursor = Convert.ToBase64String(Encoding.UTF8.GetBytes(lastItem.MovementId.ToString()));
         }
 
         return (dtos, totalCount, nextCursor);

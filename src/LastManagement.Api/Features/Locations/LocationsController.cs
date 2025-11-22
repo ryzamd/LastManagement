@@ -1,10 +1,13 @@
 using Asp.Versioning;
 using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Locations.Commands;
 using LastManagement.Application.Features.Locations.DTOs;
 using LastManagement.Application.Features.Locations.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace LastManagement.Api.Features.Locations;
 
@@ -45,12 +48,10 @@ public sealed class LocationsController : ControllerBase
 
         if (!string.IsNullOrEmpty(filter))
         {
-            var typeMatch = System.Text.RegularExpressions.Regex.Match(
-                filter, @"locationType\s+eq\s+'(\w+)'", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var typeMatch = Regex.Match(filter, RegexPattern.Location.LOCATION_TYPE_FILTER, RegexOptions.IgnoreCase);
             if (typeMatch.Success) filterType = typeMatch.Groups[1].Value;
 
-            var activeMatch = System.Text.RegularExpressions.Regex.Match(
-                filter, @"isActive\s+eq\s+(true|false)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var activeMatch = Regex.Match(filter, RegexPattern.Location.IS_ACTIVE_FILTER, RegexOptions.IgnoreCase);
             if (activeMatch.Success) filterActive = bool.Parse(activeMatch.Groups[1].Value);
         }
 
@@ -77,11 +78,11 @@ public sealed class LocationsController : ControllerBase
                 Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 Status = StatusCodes.Status404NotFound,
                 Detail = result.Error,
-                Instance = $"/api/v1/locations/{id}"
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, id)
             });
         }
 
-        Response.Headers.CacheControl = "public, max-age=60";
+        Response.Headers.CacheControl = CacheConstants.CacheControl.PUBLIC_MAX_AGE_60;
         return Ok(result.Value);
     }
 
@@ -104,13 +105,13 @@ public sealed class LocationsController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.DUPLICATE_RESOURCE,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
-                    Instance = "/api/v1/locations"
+                    Instance = ApiRoutes.Locations.FULL_BASE
                 });
             }
             return BadRequest(result.Error);
         }
 
-        Response.Headers.Location = $"/api/v1/locations/{result.Value!.Id}";
+        Response.Headers.Location = UrlHelper.FormatResourceUrl(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, result.Value!.Id);
         return CreatedAtAction(nameof(GetLocationById), new { id = result.Value.Id }, result.Value);
     }
 
@@ -125,7 +126,7 @@ public sealed class LocationsController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error == "Location not found")
+            if (result.Error == ErrorMessages.Location.NOT_FOUND)
             {
                 return NotFound(new ProblemDetails
                 {
@@ -133,7 +134,7 @@ public sealed class LocationsController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
-                    Instance = $"/api/v1/locations/{id}"
+                    Instance = UrlHelper.FormatInstancePath(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, id)
                 });
             }
             return BadRequest(result.Error);
@@ -153,7 +154,7 @@ public sealed class LocationsController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error == "Location not found")
+            if (result.Error == ErrorMessages.Location.NOT_FOUND)
             {
                 return NotFound(new ProblemDetails
                 {
@@ -161,7 +162,7 @@ public sealed class LocationsController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     Status = StatusCodes.Status404NotFound,
                     Detail = result.Error,
-                    Instance = $"/api/v1/locations/{id}"
+                    Instance = UrlHelper.FormatInstancePath(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 
@@ -173,7 +174,7 @@ public sealed class LocationsController : ControllerBase
                     Title = ProblemDetailsConstants.Titles.CONFLICT,
                     Status = StatusCodes.Status409Conflict,
                     Detail = result.Error,
-                    Instance = $"/api/v1/locations/{id}"
+                    Instance = UrlHelper.FormatInstancePath(ApiRoutes.Locations.FULL_BY_ID_TEMPLATE, id)
                 });
             }
 

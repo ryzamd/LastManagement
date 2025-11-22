@@ -1,5 +1,6 @@
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Authentication.Interfaces;
 
 namespace LastManagement.Application.Features.Authentication.Commands;
@@ -24,7 +25,7 @@ public sealed class LogoutCommandHandler
         var account = await _accountRepository.GetByIdAsync(command.UserId, cancellationToken);
         if (account == null)
         {
-            return Result.Failure("Account not found");
+            return Result.Failure(ErrorMessages.Account.ACCOUT_NOT_FOUND);
         }
 
         account.RevokeRefreshToken();

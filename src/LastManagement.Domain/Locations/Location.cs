@@ -1,4 +1,5 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 using LastManagement.Domain.Locations.Events;
 
 namespace LastManagement.Domain.Locations;
@@ -24,16 +25,16 @@ public sealed class Location : Entity
     public static Location Create(string locationCode, string locationName, LocationType locationType)
     {
         if (string.IsNullOrWhiteSpace(locationCode))
-            throw new ArgumentException("Location code cannot be empty", nameof(locationCode));
+            throw new ArgumentException(DomainValidationMessages.Location.CODE_EMPTY, nameof(locationCode));
 
         if (locationCode.Length > 20)
-            throw new ArgumentException("Location code cannot exceed 20 characters", nameof(locationCode));
+            throw new ArgumentException(DomainValidationMessages.Location.CODE_EXCEEDS_LENGTH, nameof(locationCode));
 
         if (string.IsNullOrWhiteSpace(locationName))
-            throw new ArgumentException("Location name cannot be empty", nameof(locationName));
+            throw new ArgumentException(DomainValidationMessages.Location.NAME_EMPTY, nameof(locationName));
 
         if (locationName.Length > 100)
-            throw new ArgumentException("Location name cannot exceed 100 characters", nameof(locationName));
+            throw new ArgumentException(DomainValidationMessages.Location.NAME_EXCEEDS_LENGTH, nameof(locationName));
 
         return new Location(locationCode, locationName, locationType);
     }
@@ -41,10 +42,10 @@ public sealed class Location : Entity
     public void UpdateName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
-            throw new ArgumentException("Location name cannot be empty", nameof(newName));
+            throw new ArgumentException(DomainValidationMessages.Location.NAME_EMPTY, nameof(newName));
 
         if (newName.Length > 100)
-            throw new ArgumentException("Location name cannot exceed 100 characters", nameof(newName));
+            throw new ArgumentException(DomainValidationMessages.Location.NAME_EXCEEDS_LENGTH, nameof(newName));
 
         LocationName = newName;
         IncrementVersion();

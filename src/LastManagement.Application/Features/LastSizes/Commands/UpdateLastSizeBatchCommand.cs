@@ -1,6 +1,10 @@
+using LastManagement.Api.Constants;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 using LastManagement.Domain.LastSizes.Enums;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.LastSizes.Commands;
 
@@ -29,13 +33,13 @@ public class UpdateLastSizeBatchCommand
                     result.Results.Add(new BatchItemResult
                     {
                         Id = operation.Id,
-                        Status = "error",
+                        Status = StatusContants.ERROR,
                         Error = new BatchError
                         {
-                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                            Title = "Not Found",
+                            Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                            Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                             Status = 404,
-                            Detail = $"Last size with ID {operation.Id} not found"
+                            Detail = StringFormatter.FormatMessage(ErrorMessages.LastSize.NOT_FOUND, operation.Id)
                         }
                     });
                     continue;
@@ -48,16 +52,16 @@ public class UpdateLastSizeBatchCommand
                     result.Results.Add(new BatchItemResult
                     {
                         Id = operation.Id,
-                        Status = "error",
+                        Status = StatusContants.ERROR,
                         Error = new BatchError
                         {
-                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
-                            Title = "Conflict",
+                            Type = ProblemDetailsConstants.Types.RFC_CONFLICT,
+                            Title = ProblemDetailsConstants.Titles.CONFLICT,
                             Status = 409,
-                            Detail = "Cannot update size that is used in inventory",
+                            Detail = ErrorMessages.LastSize.SIZE_IS_IN_USE_CANNOT_UPDATE,
                             AdditionalData = new Dictionary<string, object>
                             {
-                                ["conflictReason"] = "has-inventory",
+                                ["conflictReason"] = ConflictMessages.Reasons.HAS_INVENTORY,
                                 ["sizeValue"] = lastSize.SizeValue,
                                 ["sizeLabel"] = lastSize.SizeLabel
                             }
@@ -94,13 +98,13 @@ public class UpdateLastSizeBatchCommand
                                 result.Results.Add(new BatchItemResult
                                 {
                                     Id = operation.Id,
-                                    Status = "error",
+                                    Status = StatusContants.ERROR,
                                     Error = new BatchError
                                     {
-                                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                                        Title = "Bad Request",
+                                        Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                                        Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
                                         Status = 400,
-                                        Detail = $"Replacement size with ID {operation.Patch.ReplacementSizeId.Value} not found"
+                                        Detail = StringFormatter.FormatMessage(ErrorMessages.LastSize.NOT_FOUND, operation.Patch.ReplacementSizeId.Value)
                                     }
                                 });
                                 continue;
@@ -117,7 +121,7 @@ public class UpdateLastSizeBatchCommand
                 result.Results.Add(new BatchItemResult
                 {
                     Id = operation.Id,
-                    Status = "success",
+                    Status = StatusContants.SUCCESS,
                     Data = new
                     {
                         id = lastSize.SizeId,
@@ -133,11 +137,11 @@ public class UpdateLastSizeBatchCommand
                 result.Results.Add(new BatchItemResult
                 {
                     Id = operation.Id,
-                    Status = "error",
+                    Status = StatusContants.ERROR,
                     Error = new BatchError
                     {
-                        Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                        Title = "Internal Server Error",
+                        Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                        Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                         Status = 500,
                         Detail = ex.Message
                     }

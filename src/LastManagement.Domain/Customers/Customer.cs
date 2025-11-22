@@ -1,4 +1,5 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 using LastManagement.Domain.Customers.Events;
 
 namespace LastManagement.Domain.Customers;
@@ -20,10 +21,10 @@ public sealed class Customer : Entity
     public static Customer Create(string customerName, CustomerStatus status = CustomerStatus.Active)
     {
         if (string.IsNullOrWhiteSpace(customerName))
-            throw new ArgumentException("Customer name cannot be empty", nameof(customerName));
+            throw new ArgumentException(DomainValidationMessages.Customer.NAME_EMPTY, nameof(customerName));
 
         if (customerName.Length > 200)
-            throw new ArgumentException("Customer name cannot exceed 200 characters", nameof(customerName));
+            throw new ArgumentException(DomainValidationMessages.Customer.NAME_EXCEEDS_LENGTH, nameof(customerName));
 
         return new Customer(customerName, status);
     }
@@ -31,10 +32,10 @@ public sealed class Customer : Entity
     public void UpdateName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
-            throw new ArgumentException("Customer name cannot be empty", nameof(newName));
+            throw new ArgumentException(DomainValidationMessages.Customer.NAME_EMPTY, nameof(newName));
 
         if (newName.Length > 200)
-            throw new ArgumentException("Customer name cannot exceed 200 characters", nameof(newName));
+            throw new ArgumentException(DomainValidationMessages.Customer.NAME_EXCEEDS_LENGTH, nameof(newName));
 
         CustomerName = newName;
         IncrementVersion();

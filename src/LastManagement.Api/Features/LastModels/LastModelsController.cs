@@ -1,4 +1,7 @@
+using LastManagement.Api.Constants;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastModels.Queries;
+using LastManagement.Utilities.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,12 +51,12 @@ public class LastModelsController : ControllerBase
             _logger.LogError(ex, "Error retrieving last models");
             return StatusCode(500, new
             {
-                type = "http://localhost:5000/problems/internal-error",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while retrieving last models",
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.INTERNAL_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ProblemDetailsConstants.Details.RETRIEVING_LAST_MODELS_ERROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -73,15 +76,15 @@ public class LastModelsController : ControllerBase
             {
                 return BadRequest(new
                 {
-                    type = "http://localhost:5000/problems/validation-error",
-                    title = "Validation Error",
-                    status = 400,
-                    detail = "Last ID must be a positive integer",
-                    instance = HttpContext.Request.Path.ToString(),
-                    traceId = HttpContext.TraceIdentifier,
-                    errors = new Dictionary<string, string[]>
+                    Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                    Title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                    Status = 400,
+                    Detail = ErrorMessages.LastModel.LAST_ID_MUST_BE_POSITIVE_INTERGER,
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier,
+                    Errors = new Dictionary<string, string[]>
                     {
-                        { "lastId", new[] { "Must be a positive integer" } }
+                        { "lastId", new[] { ErrorMessages.LastModel.POSITIVE_INTEGER_ERROR } }
                     }
                 });
             }
@@ -100,12 +103,12 @@ public class LastModelsController : ControllerBase
             _logger.LogError(ex, "Error retrieving models for last ID {LastId}", lastId);
             return StatusCode(500, new
             {
-                type = "http://localhost:5000/problems/internal-error",
-                title = "Internal Server Error",
-                status = 500,
-                detail = $"An error occurred while retrieving models for last ID {lastId}",
-                instance = HttpContext.Request.Path.ToString(),
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.INTERNAL_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = StringFormatter.FormatMessage(ErrorMessages.LastModel.DETAIL_ERROR, lastId),
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }

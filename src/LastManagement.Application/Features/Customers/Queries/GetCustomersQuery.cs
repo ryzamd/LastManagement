@@ -1,14 +1,13 @@
+using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Common.Models;
 using LastManagement.Application.Features.Customers.DTOs;
 using LastManagement.Application.Features.Customers.Interfaces;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.Customers.Queries;
 
-public sealed record GetCustomersQuery(
-    int Limit,
-    int? AfterId,
-    string? FilterStatus,
-    string? OrderBy);
+public sealed record GetCustomersQuery(int Limit, int? AfterId, string? FilterStatus, string? OrderBy);
 
 public sealed class GetCustomersQueryHandler
 {
@@ -42,11 +41,13 @@ public sealed class GetCustomersQueryHandler
         if (items.Count == query.Limit)
         {
             var lastId = items[^1].Id;
-            nextLink = $"/api/v1/customers?limit={query.Limit}&after={lastId}";
+            nextLink = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_PAGINATION_TEMPLATE, query.Limit, lastId);
+
             if (!string.IsNullOrEmpty(query.FilterStatus))
-                nextLink += $"&$filter=status eq '{query.FilterStatus}'";
+                nextLink += StringFormatter.FormatMessage(ApiRoutes.Customers.QueryStrings.FILTER_STATUS, query.FilterStatus);
+
             if (!string.IsNullOrEmpty(query.OrderBy))
-                nextLink += $"&$orderby={query.OrderBy}";
+                nextLink += StringFormatter.FormatMessage(ApiRoutes.Customers.QueryStrings.ORDERBY, query.OrderBy);
         }
 
         var response = new PaginatedResponse<CustomerDto>

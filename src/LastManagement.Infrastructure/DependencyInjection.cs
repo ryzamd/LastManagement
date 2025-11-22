@@ -1,4 +1,5 @@
-﻿using LastManagement.Application.Common.Interfaces;
+﻿using LastManagement.Api.Constants;
+using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Features.Authentication.Interfaces;
 using LastManagement.Application.Features.Customers.Interfaces;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
@@ -29,10 +30,9 @@ public static class DependencyInjection
         {
             var interceptor = sp.GetRequiredService<AuditInterceptor>();
             options.UseNpgsql(
-                    configuration.GetConnectionString("DefaultConnection"),
+                    configuration.GetConnectionString(ConfigurationKeys.Database.DEFAULT_CONNECTION),
                     npgsqlOptions => npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
-                )
-                .AddInterceptors(interceptor);
+                ).AddInterceptors(interceptor);
         });
 
         // Repositories

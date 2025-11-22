@@ -1,7 +1,10 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastNames.DTOs;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Domain.LastNames.Entities;
 using LastManagement.Domain.LastNames.Enums;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.LastNames.Commands;
 
@@ -17,13 +20,14 @@ public class UpdateLastNameCommand
     public async Task<LastName> ExecuteAsync(int lastId, UpdateLastNameRequest request, CancellationToken cancellationToken = default)
     {
         var lastName = await _repository.GetByIdAsync(lastId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Last name with ID {lastId} not found");
+            ?? throw new KeyNotFoundException(StringFormatter.FormatMessage(ErrorMessages.LastName.NOT_FOUND, lastId));
+
 
         // Update last code if provided
         if (!string.IsNullOrWhiteSpace(request.LastCode) && request.LastCode != lastName.LastCode)
         {
             if (await _repository.ExistsByCodeAsync(request.LastCode, lastId, cancellationToken))
-                throw new InvalidOperationException($"Last code '{request.LastCode}' already exists");
+                throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.LastName.ALREADY_EXISTS, request.LastCode, RoleConstants.CUSTOMER));
 
             lastName.UpdateLastCode(request.LastCode);
         }
@@ -32,7 +36,7 @@ public class UpdateLastNameCommand
         if (!string.IsNullOrWhiteSpace(request.Status))
         {
             if (!Enum.TryParse<LastNameStatus>(request.Status, true, out var newStatus))
-                throw new ArgumentException($"Invalid status value: {request.Status}");
+                throw new ArgumentException(StringFormatter.FormatMessage(ErrorMessages.LastName.INVALID_STATUS, request.Status));
 
             lastName.UpdateStatus(newStatus, request.DiscontinueReason);
         }

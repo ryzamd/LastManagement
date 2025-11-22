@@ -2,6 +2,7 @@ using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
 using LastManagement.Application.Features.Authentication.DTOs;
 using LastManagement.Application.Features.Authentication.Interfaces;
+using LastManagement.Utilities.Constants.Global;
 
 namespace LastManagement.Application.Features.Authentication.Commands;
 
@@ -32,13 +33,13 @@ public sealed class LoginCommandHandler
         var account = await _accountRepository.GetByUsernameForUpdateAsync(command.Username, cancellationToken);
         if (account == null || !account.IsActive)
         {
-            return Result.Failure<LoginResponse>("Invalid username or password");
+            return Result.Failure<LoginResponse>(ResultMessages.Authentication.INVALID_CREDENTIALS);
         }
 
         // 2. Verify password
         if (!_passwordHasher.VerifyPassword(command.Password, account.PasswordHash))
         {
-            return Result.Failure<LoginResponse>("Invalid username or password");
+            return Result.Failure<LoginResponse>(ResultMessages.Authentication.INVALID_CREDENTIALS);
         }
 
         // 3. Generate tokens

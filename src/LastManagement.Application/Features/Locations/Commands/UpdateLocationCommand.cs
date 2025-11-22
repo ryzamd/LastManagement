@@ -1,5 +1,6 @@
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Locations.DTOs;
 using LastManagement.Application.Features.Locations.Interfaces;
 using LastManagement.Domain.Locations;
@@ -24,7 +25,7 @@ public sealed class UpdateLocationCommandHandler
         var location = await _locationRepository.GetByIdForUpdateAsync(command.Id, cancellationToken);
         if (location == null)
         {
-            return Result.Failure<LocationDto>("Location not found");
+            return Result.Failure<LocationDto>(ErrorMessages.Location.NOT_FOUND);
         }
 
         if (!string.IsNullOrWhiteSpace(command.LocationName))
@@ -36,7 +37,7 @@ public sealed class UpdateLocationCommandHandler
         {
             if (!Enum.TryParse<LocationType>(command.LocationType, out var newType))
             {
-                return Result.Failure<LocationDto>("Invalid location type");
+                return Result.Failure<LocationDto>(ErrorMessages.Location.INVALID_TYPE);
             }
             location.UpdateType(newType);
         }

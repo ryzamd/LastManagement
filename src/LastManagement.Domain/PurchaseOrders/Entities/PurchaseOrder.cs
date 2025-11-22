@@ -1,5 +1,7 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 using LastManagement.Domain.PurchaseOrders.Enums;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Domain.PurchaseOrders.Entities;
 
@@ -26,13 +28,13 @@ public sealed class PurchaseOrder : Entity
     public static PurchaseOrder Create(string orderNumber, int locationId, string requestedBy, string? department = null, string? notes = null)
     {
         if (string.IsNullOrWhiteSpace(orderNumber))
-            throw new ArgumentException("Order number cannot be empty", nameof(orderNumber));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrder.ORDER_NUMBER_EMPTY, nameof(orderNumber));
 
         if (string.IsNullOrWhiteSpace(requestedBy))
-            throw new ArgumentException("Requested by cannot be empty", nameof(requestedBy));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrder.REQUESTED_BY_EMPTY, nameof(requestedBy));
 
         if (locationId <= 0)
-            throw new ArgumentException("Location ID must be positive", nameof(locationId));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrder.LOCATION_ID_POSITIVE, nameof(locationId));
 
         return new PurchaseOrder
         {
@@ -50,10 +52,10 @@ public sealed class PurchaseOrder : Entity
     public void Confirm(string reviewedBy, string? adminNotes = null)
     {
         if (Status != PurchaseOrderStatus.Pending)
-            throw new InvalidOperationException($"Cannot confirm order with status {Status}. Order must be Pending.");
+            throw new InvalidOperationException(StringFormatter.FormatMessage(DomainValidationMessages.PurchaseOrder.CANNOT_CONFIRM_NON_PENDING, Status));
 
         if (string.IsNullOrWhiteSpace(reviewedBy))
-            throw new ArgumentException("Reviewed by cannot be empty", nameof(reviewedBy));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrder.REVIEWED_BY_EMPTY, nameof(reviewedBy));
 
         Status = PurchaseOrderStatus.Confirmed;
         ReviewedAt = DateTime.UtcNow;
@@ -65,10 +67,10 @@ public sealed class PurchaseOrder : Entity
     public void Deny(string reviewedBy, string? adminNotes = null)
     {
         if (Status != PurchaseOrderStatus.Pending)
-            throw new InvalidOperationException($"Cannot deny order with status {Status}. Order must be Pending.");
+            throw new InvalidOperationException(StringFormatter.FormatMessage(DomainValidationMessages.PurchaseOrder.CANNOT_DENY_NON_PENDING, Status));
 
         if (string.IsNullOrWhiteSpace(reviewedBy))
-            throw new ArgumentException("Reviewed by cannot be empty", nameof(reviewedBy));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrder.REVIEWED_BY_EMPTY, nameof(reviewedBy));
 
         Status = PurchaseOrderStatus.Denied;
         ReviewedAt = DateTime.UtcNow;

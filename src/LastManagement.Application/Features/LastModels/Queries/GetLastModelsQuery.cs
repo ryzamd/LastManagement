@@ -1,3 +1,5 @@
+using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Features.LastModels.DTOs;
 using LastManagement.Application.Features.LastModels.Interfaces;
 
@@ -25,8 +27,8 @@ public class GetLastModelsQuery
             CreatedAt = m.CreatedAt,
             Links = new
             {
-                self = new { href = $"/api/v1/last-models/{m.LastModelId}" },
-                last = new { href = $"/api/v1/last-names/{m.LastId}" }
+                self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastModels.FULL_BY_MODEL_ID, m.LastModelId) },
+                last = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, m.LastId) }
             }
         });
     }

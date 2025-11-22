@@ -6,6 +6,7 @@ public static class HttpConstants
     {
         public const string APPLICATION_JSON = "application/json";
         public const string APPLICATION_PROBLEM_JSON = "application/problem+json";
+        public const string BEARER = "Bearer";
     }
 
     public static class Methods
@@ -24,5 +25,8 @@ public static class HttpConstants
         public const string ETAG = "ETag";
         public const string IF_NONE_MATCH = "If-None-Match";
         public const string CONTENT_TYPE = "Content-Type";
+        public const string IF_MATCH = "If-Match";
+        public const string X_TOTAL_COUNT = "X-Total-Count";
+        public const string CACHE_CONTROL = "Cache-Control";
     }
 }

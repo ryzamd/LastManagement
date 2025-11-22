@@ -1,8 +1,10 @@
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Locations.DTOs;
 using LastManagement.Application.Features.Locations.Interfaces;
 using LastManagement.Domain.Locations;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.Locations.Commands;
 
@@ -23,12 +25,12 @@ public sealed class CreateLocationCommandHandler
     {
         if (await _locationRepository.ExistsByCodeAsync(command.LocationCode, null, cancellationToken))
         {
-            return Result.Failure<LocationDto>($"Location with code '{command.LocationCode}' already exists");
+            return Result.Failure<LocationDto>(StringFormatter.FormatMessage(ErrorMessages.Location.ALREADY_EXISTS, command.LocationCode));
         }
 
         if (!Enum.TryParse<LocationType>(command.LocationType, out var locationType))
         {
-            return Result.Failure<LocationDto>("Invalid location type");
+            return Result.Failure<LocationDto>(ErrorMessages.Location.INVALID_TYPE);
         }
 
         var location = Location.Create(command.LocationCode, command.LocationName, locationType);

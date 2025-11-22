@@ -1,4 +1,5 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 using LastManagement.Domain.LastSizes.Enums;
 using LastManagement.Domain.LastSizes.Events;
 
@@ -22,13 +23,13 @@ public class LastSize : Entity
     public static LastSize Create(decimal sizeValue, string sizeLabel)
     {
         if (sizeValue <= 0)
-            throw new ArgumentException("Size value must be greater than zero", nameof(sizeValue));
+            throw new ArgumentException(DomainValidationMessages.LastSize.VALUE_GREATER_THAN_ZERO, nameof(sizeValue));
 
         if (string.IsNullOrWhiteSpace(sizeLabel))
-            throw new ArgumentException("Size label is required", nameof(sizeLabel));
+            throw new ArgumentException(DomainValidationMessages.LastSize.LABEL_REQUIRED, nameof(sizeLabel));
 
         if (sizeLabel.Length > 20)
-            throw new ArgumentException("Size label cannot exceed 20 characters", nameof(sizeLabel));
+            throw new ArgumentException(DomainValidationMessages.LastSize.LABEL_EXCEEDS_LENGTH, nameof(sizeLabel));
 
         var lastSize = new LastSize
         {
@@ -47,10 +48,10 @@ public class LastSize : Entity
     public void UpdateLabel(string newLabel)
     {
         if (string.IsNullOrWhiteSpace(newLabel))
-            throw new ArgumentException("Size label is required", nameof(newLabel));
+            throw new ArgumentException(DomainValidationMessages.LastSize.LABEL_REQUIRED, nameof(newLabel));
 
         if (newLabel.Length > 20)
-            throw new ArgumentException("Size label cannot exceed 20 characters", nameof(newLabel));
+            throw new ArgumentException(DomainValidationMessages.LastSize.LABEL_EXCEEDS_LENGTH, nameof(newLabel));
 
         SizeLabel = newLabel.Trim();
         UpdatedAt = DateTime.UtcNow;
@@ -59,7 +60,7 @@ public class LastSize : Entity
     public void Discontinue(int? replacementSizeId = null)
     {
         if (Status == SizeStatus.Discontinued)
-            throw new InvalidOperationException("Size is already discontinued");
+            throw new InvalidOperationException(DomainValidationMessages.LastSize.ALREADY_DISCONTINUED);
 
         Status = replacementSizeId.HasValue ? SizeStatus.Replaced : SizeStatus.Discontinued;
         ReplacementSizeId = replacementSizeId;
@@ -71,7 +72,7 @@ public class LastSize : Entity
     public void Reactivate()
     {
         if (Status == SizeStatus.Active)
-            throw new InvalidOperationException("Size is already active");
+            throw new InvalidOperationException(DomainValidationMessages.LastSize.ALREADY_ACTIVE);
 
         Status = SizeStatus.Active;
         ReplacementSizeId = null;
