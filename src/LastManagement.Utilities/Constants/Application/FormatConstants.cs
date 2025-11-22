@@ -12,7 +12,6 @@ public static class FormatConstants
     {
         public const string ORDER_NUMBER_PREFIX = "PO-";
         public const string ORDER_NUMBER_TEMPLATE = "PO-{0}-{1:D5}";
-        public const int SEQUENCE_WIDTH = 5;
         public const int MAX_SEQUENCE_PER_DAY = 99999;
     }
 

@@ -1,8 +1,12 @@
 using Asp.Versioning;
 using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastSizes.Commands;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Queries;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,12 +42,15 @@ public class LastSizesController : ControllerBase
             {
                 // Support: $filter=status eq 'Active'
                 var filterLower = filter.ToLower();
-                if (filterLower.Contains("status eq 'active'") || filterLower.Contains("status eq active"))
-                    statusFilter = "Active";
-                else if (filterLower.Contains("status eq 'discontinued'") || filterLower.Contains("status eq discontinued"))
-                    statusFilter = "Discontinued";
-                else if (filterLower.Contains("status eq 'replaced'") || filterLower.Contains("status eq replaced"))
-                    statusFilter = "Replaced";
+
+                if (filterLower.Contains(RegexPattern.LastSize.STATUS_ACTIVE_FILTER))
+                    statusFilter = StatusConstants.LastSize.ACTIVE;
+
+                else if (filterLower.Contains(RegexPattern.LastSize.STATUS_DISCONTINUED_FILTER))
+                    statusFilter = StatusConstants.LastSize.DISCONTINUED;
+
+                else if (filterLower.Contains(RegexPattern.LastSize.STATUS_REPLACED_FILTER))
+                    statusFilter = StatusConstants.LastSize.REPLACED;
             }
 
             var (items, totalCount, nextId) = await query.ExecuteAsync(limit, after, statusFilter, cancellationToken);
@@ -52,7 +59,7 @@ public class LastSizesController : ControllerBase
             {
                 value = items,
                 count = totalCount,
-                nextLink = nextId.HasValue ? $"/api/v1/last-sizes?limit={limit}&after={nextId}" : null
+                nextLink = nextId.HasValue ? UrlHelper.FormatNextLink(ApiRoutes.LastSizes.FULL_PAGINATION_TEMPLATE, limit, nextId.Value) : null
             };
 
             return Ok(response);
@@ -62,12 +69,12 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error getting last sizes");
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while retrieving last sizes",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ErrorMessages.LastSize.RETREVING_LAST_SIZE_ERROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -88,12 +95,12 @@ public class LastSizesController : ControllerBase
             {
                 return NotFound(new
                 {
-                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                    title = "Not Found",
-                    status = 404,
-                    detail = $"Last size with ID {id} not found",
-                    instance = HttpContext.Request.Path,
-                    traceId = HttpContext.TraceIdentifier
+                    Type = ProblemDetailsConstants.Types.RFC_NOT_FOUND,
+                    Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                    Status = 404,
+                    Detail = StringFormatter.FormatMessage(ErrorMessages.LastSize.NOT_FOUND, id),
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier
                 });
             }
 
@@ -104,12 +111,11 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error getting last size {SizeId}", id);
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while retrieving the last size",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
+                Detail = ProblemDetailsConstants.Details.INVALID_FIELD_VALUES,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -135,12 +141,12 @@ public class LastSizesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    title = "Bad Request",
-                    status = 400,
-                    detail = "One or more validation errors occurred",
-                    instance = HttpContext.Request.Path,
-                    traceId = HttpContext.TraceIdentifier,
+                    Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                    Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
+                    Status = 400,
+                    Detail = ErrorMessages.LastSize.VALIDATION_ERROR,
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier,
                     errors
                 });
             }
@@ -158,7 +164,7 @@ public class LastSizesController : ControllerBase
                 UpdatedAt = lastSize.UpdatedAt,
                 Links = new Dictionary<string, object>
                 {
-                    ["self"] = new { href = $"/api/v1/last-sizes/{lastSize.SizeId}" }
+                    ["self"] = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastSizes.FULL_BY_ID_TEMPLATE, lastSize.SizeId) }
                 }
             };
 
@@ -171,13 +177,13 @@ public class LastSizesController : ControllerBase
         {
             return Conflict(new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
+                type = ProblemDetailsConstants.Types.RFC_CONFLICT,
                 Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
                 instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier,
-                conflictReason = "duplicate-size-value"
+                conflictReason = ConflictMessages.Reasons.DUPLICATE_SIZE_VALUE,
             });
         }
         catch (Exception ex)
@@ -185,10 +191,10 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error creating last size");
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
+                type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                 status = 500,
-                detail = "An error occurred while creating the last size",
+                detail = ErrorMessages.LastSize.CREATE_LAST_SIZE_ERROR,
                 instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
@@ -216,10 +222,10 @@ public class LastSizesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    title = "Bad Request",
+                    type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                    title = ProblemDetailsConstants.Titles.BAD_REQUEST,
                     status = 400,
-                    detail = "One or more validation errors occurred",
+                    detail = ErrorMessages.LastSize.VALIDATION_ERROR,
                     instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier,
                     errors
@@ -239,7 +245,7 @@ public class LastSizesController : ControllerBase
                 UpdatedAt = lastSize.UpdatedAt,
                 Links = new Dictionary<string, object>
                 {
-                    ["self"] = new { href = $"/api/v1/last-sizes/{lastSize.SizeId}" }
+                    ["self"] = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastSizes.FULL_BY_ID_TEMPLATE, lastSize.SizeId) }
                 }
             };
 
@@ -249,24 +255,24 @@ public class LastSizesController : ControllerBase
         {
             return NotFound(new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                title = "Not Found",
-                status = 404,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_NOT_FOUND,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (InvalidOperationException ex)
         {
             return Conflict(new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
+                Type = ProblemDetailsConstants.Types.RFC_CONFLICT,
                 Title = ProblemDetailsConstants.Titles.CONFLICT,
-                status = 409,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Status = 409,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (Exception ex)
@@ -274,12 +280,12 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error updating last size {SizeId}", id);
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while updating the last size",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ErrorMessages.LastSize.UPDATE_LAST_SIZE_ERROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -301,29 +307,29 @@ public class LastSizesController : ControllerBase
         {
             return NotFound(new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                title = "Not Found",
-                status = 404,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_NOT_FOUND,
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("inventory"))
         {
             return Conflict(new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
+                Type = ProblemDetailsConstants.Types.RFC_CONFLICT,
                 Title = ProblemDetailsConstants.Titles.CONFLICT,
-                status = 409,
-                detail = ex.Message,
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier,
-                conflictReason = "has-inventory",
-                suggestions = new[]
+                Status = 409,
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier,
+                ConflictReason = ConflictMessages.Reasons.HAS_INVENTORY,
+                Suggestions = new[]
                 {
-                    "Remove all inventory records using this size before deleting",
-                    "Discontinue the size instead using PATCH with status: Discontinued"
+                    ConflictMessages.Suggestions.REMOVE_INVENTORY_RECORDS,
+                    ConflictMessages.Suggestions.DISCONTINUE_SIZE_INSTEAD
                 }
             });
         }
@@ -332,12 +338,12 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error deleting last size {SizeId}", id);
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while deleting the last size",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ErrorMessages.LastSize.DELETE_LAST_SIZE_EROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -363,12 +369,12 @@ public class LastSizesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    title = "Bad Request",
-                    status = 400,
-                    detail = "One or more validation errors occurred",
-                    instance = HttpContext.Request.Path,
-                    traceId = HttpContext.TraceIdentifier,
+                    Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                    Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
+                    Status = 400,
+                    Detail = ErrorMessages.LastSize.VALIDATION_ERROR,
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier,
                     errors
                 });
             }
@@ -382,12 +388,12 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error creating batch sizes");
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while creating batch sizes",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ErrorMessages.LastSize.CREATE_BATCH_LAST_SIZE_ERROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -413,12 +419,12 @@ public class LastSizesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    title = "Bad Request",
-                    status = 400,
-                    detail = "One or more validation errors occurred",
-                    instance = HttpContext.Request.Path,
-                    traceId = HttpContext.TraceIdentifier,
+                    Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                    Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
+                    Status = 400,
+                    Detail = ErrorMessages.LastSize.VALIDATION_ERROR,
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier,
                     errors
                 });
             }
@@ -432,12 +438,12 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error updating batch sizes");
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while updating batch sizes",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ErrorMessages.LastSize.UPDATE_BATCH_LAST_SIZE_ERROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -463,12 +469,12 @@ public class LastSizesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    title = "Bad Request",
-                    status = 400,
-                    detail = "One or more validation errors occurred",
-                    instance = HttpContext.Request.Path,
-                    traceId = HttpContext.TraceIdentifier,
+                    Type = ProblemDetailsConstants.Types.RFC_BAD_REQUEST,
+                    Title = ProblemDetailsConstants.Titles.BAD_REQUEST,
+                    Status = 400,
+                    Detail = ErrorMessages.LastSize.VALIDATION_ERROR,
+                    Instance = HttpContext.Request.Path,
+                    TraceId = HttpContext.TraceIdentifier,
                     errors
                 });
             }
@@ -482,12 +488,12 @@ public class LastSizesController : ControllerBase
             _logger.LogError(ex, "Error deleting batch sizes");
             return StatusCode(500, new
             {
-                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-                title = "Internal Server Error",
-                status = 500,
-                detail = "An error occurred while deleting batch sizes",
-                instance = HttpContext.Request.Path,
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.RFC_INTERNAL_SERVER_ERROR,
+                Title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
+                Status = 500,
+                Detail = ErrorMessages.LastSize.DELETE_BATCH_LAST_SIZE_ERROR,
+                Instance = HttpContext.Request.Path,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }

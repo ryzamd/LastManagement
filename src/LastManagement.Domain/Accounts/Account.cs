@@ -1,5 +1,6 @@
 using LastManagement.Domain.Accounts.Events;
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 
 namespace LastManagement.Domain.Accounts;
 
@@ -30,13 +31,13 @@ public sealed class Account : Entity
     public static Account Create(string username, string passwordHash, string fullName, AccountRole role = AccountRole.Admin)
     {
         if (string.IsNullOrWhiteSpace(username))
-            throw new ArgumentException("Username cannot be empty", nameof(username));
+            throw new ArgumentException(DomainValidationMessages.Account.USERNAME_EMPTY, nameof(username));
 
         if (string.IsNullOrWhiteSpace(passwordHash))
-            throw new ArgumentException("Password hash cannot be empty", nameof(passwordHash));
+            throw new ArgumentException(DomainValidationMessages.Account.PASSWORD_HASH_EMPTY, nameof(passwordHash));
 
         if (string.IsNullOrWhiteSpace(fullName))
-            throw new ArgumentException("Full name cannot be empty", nameof(fullName));
+            throw new ArgumentException(DomainValidationMessages.Account.FULL_NAME_EMPTY, nameof(fullName));
 
         return new Account(username, passwordHash, fullName, role);
     }

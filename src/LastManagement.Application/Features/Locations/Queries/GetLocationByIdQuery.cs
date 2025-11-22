@@ -1,4 +1,5 @@
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Locations.DTOs;
 using LastManagement.Application.Features.Locations.Interfaces;
 
@@ -20,7 +21,7 @@ public sealed class GetLocationByIdQueryHandler
         var location = await _locationRepository.GetByIdAsync(query.Id, cancellationToken);
         if (location == null)
         {
-            return Result.Failure<LocationDto>("Location not found");
+            return Result.Failure<LocationDto>(ErrorMessages.Location.NOT_FOUND);
         }
 
         var dto = new LocationDto

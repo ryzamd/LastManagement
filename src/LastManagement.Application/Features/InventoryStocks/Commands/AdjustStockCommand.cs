@@ -1,6 +1,9 @@
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
+using LastManagement.Domain.Constants;
 using LastManagement.Domain.InventoryStocks;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.InventoryStocks.Commands;
 
@@ -17,15 +20,11 @@ public class AdjustStockCommand
         _movementRepository = movementRepository;
     }
 
-    public async Task<AdjustStockResult> ExecuteAsync(
-        int stockId,
-        AdjustStockRequest request,
-        string adminUser,
-        CancellationToken cancellationToken = default)
+    public async Task<AdjustStockResult> ExecuteAsync(int stockId, AdjustStockRequest request, string adminUser, CancellationToken cancellationToken = default)
     {
         var stock = await _stockRepository.GetByIdAsync(stockId, cancellationToken);
         if (stock == null)
-            throw new KeyNotFoundException($"Stock with ID {stockId} not found");
+            throw new KeyNotFoundException(StringFormatter.FormatMessage(ErrorMessages.Stock.NOT_FOUND, stockId));
 
         // Store previous values
         var previousGood = stock.QuantityGood;
@@ -66,10 +65,10 @@ public class AdjustStockCommand
 
     private static string MapAdjustmentTypeToMovementType(AdjustmentType type) => type switch
     {
-        AdjustmentType.Add => "Adjust",
-        AdjustmentType.Remove => "Adjust",
-        AdjustmentType.Damage => "Damage",
-        AdjustmentType.Repair => "Repair",
-        _ => "Adjust"
+        AdjustmentType.Add => MovementTypeConstants.ADJUSTMENT,
+        AdjustmentType.Remove => MovementTypeConstants.ADJUSTMENT,
+        AdjustmentType.Damage => MovementTypeConstants.DAMAGE,
+        AdjustmentType.Repair => MovementTypeConstants.REPAIR,
+        _ => MovementTypeConstants.ADJUSTMENT
     };
 }

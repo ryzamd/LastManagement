@@ -1,4 +1,7 @@
+using LastManagement.Application.Constants;
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Domain.InventoryStocks;
 
@@ -19,7 +22,7 @@ public class InventoryStock : Entity
     public static InventoryStock Create(int lastId, int sizeId, int locationId, int initialQuantity)
     {
         if (initialQuantity < 0)
-            throw new ArgumentException("Initial quantity cannot be negative", nameof(initialQuantity));
+            throw new ArgumentException(DomainValidationMessages.InventoryStock.INITIAL_QUANTITY_NEGATIVE, nameof(initialQuantity));
 
         var stock = new InventoryStock
         {
@@ -63,7 +66,7 @@ public class InventoryStock : Entity
     public void AdjustQuantity(AdjustmentType adjustmentType, int quantity, string reason)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Adjustment quantity must be positive", nameof(quantity));
+            throw new ArgumentException(DomainValidationMessages.InventoryStock.ADJUSTMENT_QUANTITY_POSITIVE, nameof(quantity));
 
         switch (adjustmentType)
         {
@@ -73,29 +76,26 @@ public class InventoryStock : Entity
 
             case AdjustmentType.Remove:
                 if (QuantityGood < quantity)
-                    throw new InvalidOperationException(
-                        $"Insufficient stock. Available: {QuantityGood}, Requested: {quantity}");
+                    throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.Inventory.INSUFFICIENT_STOCK, QuantityGood, quantity));
                 QuantityGood -= quantity;
                 break;
 
             case AdjustmentType.Damage:
                 if (QuantityGood < quantity)
-                    throw new InvalidOperationException(
-                        $"Cannot damage {quantity} units. Only {QuantityGood} good units available.");
+                    throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.Inventory.CANNOT_DAMAGE, quantity, QuantityGood));
                 QuantityGood -= quantity;
                 QuantityDamaged += quantity;
                 break;
 
             case AdjustmentType.Repair:
                 if (QuantityDamaged < quantity)
-                    throw new InvalidOperationException(
-                        $"Cannot repair {quantity} units. Only {QuantityDamaged} damaged units available.");
+                    throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.Inventory.CANNOT_REPAIR, quantity, QuantityDamaged));
                 QuantityDamaged -= quantity;
                 QuantityGood += quantity;
                 break;
 
             default:
-                throw new ArgumentException($"Unknown adjustment type: {adjustmentType}");
+                throw new ArgumentException(StringFormatter.FormatMessage(ErrorMessages.Inventory.UNKNOWN_ADJUSTMENT_TYPE, adjustmentType));
         }
 
         LastUpdated = DateTime.UtcNow;
@@ -113,12 +113,11 @@ public class InventoryStock : Entity
     public void Reserve(int quantity)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Reserve quantity must be positive", nameof(quantity));
+            throw new ArgumentException(DomainValidationMessages.InventoryStock.ADJUSTMENT_QUANTITY_POSITIVE, nameof(quantity));
 
         var available = GetAvailableQuantity();
         if (available < quantity)
-            throw new InvalidOperationException(
-                $"Cannot reserve {quantity} units. Only {available} available.");
+            throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.Inventory.CANNOT_RESERVE, quantity, available));
 
         QuantityReserved += quantity;
         LastUpdated = DateTime.UtcNow;
@@ -128,11 +127,10 @@ public class InventoryStock : Entity
     public void ReleaseReservation(int quantity)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Release quantity must be positive", nameof(quantity));
+            throw new ArgumentException(DomainValidationMessages.InventoryStock.ADJUSTMENT_QUANTITY_POSITIVE, nameof(quantity));
 
         if (QuantityReserved < quantity)
-            throw new InvalidOperationException(
-                $"Cannot release {quantity} units. Only {QuantityReserved} reserved.");
+            throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.Inventory.CANNOT_RELEASE, quantity, QuantityReserved));
 
         QuantityReserved -= quantity;
         LastUpdated = DateTime.UtcNow;

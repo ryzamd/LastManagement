@@ -1,6 +1,7 @@
 using LastManagement.Application.Features.Authentication.Interfaces;
 using LastManagement.Domain.Accounts;
 using LastManagement.Infrastructure.Options;
+using LastManagement.Utilities.Constants.Global;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,7 +21,7 @@ public sealed class JwtTokenService : IJwtTokenService
 
         if (string.IsNullOrEmpty(_jwtOptions.SecretKey))
         {
-            throw new InvalidOperationException("JWT SecretKey is null or empty");
+            throw new InvalidOperationException(ResultMessages.Authentication.JWT_SECRET_KEY_MISSING);
         }
     }
 

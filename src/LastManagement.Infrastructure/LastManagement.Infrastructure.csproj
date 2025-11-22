@@ -21,5 +21,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\LastManagement.Application\LastManagement.Application.csproj" />
+		<ProjectReference Include="..\LastManagement.Utilities\LastManagement.Utilities.csproj" />
 	</ItemGroup>
 </Project>

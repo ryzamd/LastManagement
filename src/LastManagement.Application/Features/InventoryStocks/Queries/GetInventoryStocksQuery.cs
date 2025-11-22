@@ -1,4 +1,5 @@
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
+using System.Text;
 
 namespace LastManagement.Application.Features.InventoryStocks.Queries;
 
@@ -40,8 +41,7 @@ public class GetInventoryStocksQuery
         if (dtos.Count == limit)
         {
             var lastItem = stocks.Last();
-            nextCursor = Convert.ToBase64String(
-                System.Text.Encoding.UTF8.GetBytes($"{lastItem.StockId}"));
+            nextCursor = Convert.ToBase64String(Encoding.UTF8.GetBytes(lastItem.StockId.ToString()));
         }
 
         return (dtos, totalCount, nextCursor);

@@ -1,4 +1,5 @@
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Customers.DTOs;
 using LastManagement.Application.Features.Customers.Interfaces;
 
@@ -20,7 +21,7 @@ public sealed class GetCustomerByIdQueryHandler
         var customer = await _customerRepository.GetByIdAsync(query.Id, cancellationToken);
         if (customer == null)
         {
-            return Result.Failure<CustomerDto>("Customer not found");
+            return Result.Failure<CustomerDto>(ErrorMessages.Account.CUSTOMER_NOT_FOUND);
         }
 
         var dto = new CustomerDto

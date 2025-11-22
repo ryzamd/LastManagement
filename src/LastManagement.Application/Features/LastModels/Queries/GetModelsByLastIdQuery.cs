@@ -1,3 +1,6 @@
+using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastModels.DTOs;
 using LastManagement.Application.Features.LastModels.Interfaces;
 
@@ -15,7 +18,7 @@ public class GetModelsByLastIdQuery
     public async Task<IEnumerable<LastModelDto>> ExecuteAsync(int lastId, CancellationToken cancellationToken = default)
     {
         if (lastId <= 0)
-            throw new ArgumentException("Last ID must be positive", nameof(lastId));
+            throw new ArgumentException(ErrorMessages.LastModel.LAST_ID_MUST_BE_POSITIVE_INTERGER, nameof(lastId));
 
         var models = await _repository.GetByLastIdAsync(lastId, cancellationToken);
 
@@ -28,8 +31,8 @@ public class GetModelsByLastIdQuery
             CreatedAt = m.CreatedAt,
             Links = new
             {
-                self = new { href = $"/api/v1/last-models/{m.LastModelId}" },
-                last = new { href = $"/api/v1/last-names/{m.LastId}" }
+                self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastModels.FULL_BY_MODEL_ID, m.LastModelId) },
+                last = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, m.LastId) }
             }
         });
     }

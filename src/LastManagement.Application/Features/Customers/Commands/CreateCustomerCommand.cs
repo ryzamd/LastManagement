@@ -1,8 +1,10 @@
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Customers.DTOs;
 using LastManagement.Application.Features.Customers.Interfaces;
 using LastManagement.Domain.Customers;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.Customers.Commands;
 
@@ -26,13 +28,13 @@ public sealed class CreateCustomerCommandHandler
         // Check duplicate name
         if (await _customerRepository.ExistsByNameAsync(command.CustomerName, null, cancellationToken))
         {
-            return Result.Failure<CustomerDto>($"Customer with name '{command.CustomerName}' already exists");
+            return Result.Failure<CustomerDto>(StringFormatter.FormatMessage(ErrorMessages.Customer.ALREADY_EXISTS, command.CustomerName));
         }
 
         // Parse status
         if (!Enum.TryParse<CustomerStatus>(command.Status, out var status))
         {
-            return Result.Failure<CustomerDto>("Invalid status value");
+            return Result.Failure<CustomerDto>(ErrorMessages.Customer.INVALID_STATUS);
         }
 
         // Create entity

@@ -2,6 +2,7 @@ using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
 using LastManagement.Application.Features.Authentication.DTOs;
 using LastManagement.Application.Features.Authentication.Interfaces;
+using LastManagement.Utilities.Constants.Global;
 
 namespace LastManagement.Application.Features.Authentication.Commands;
 
@@ -29,13 +30,13 @@ public sealed class RefreshTokenCommandHandler
         var account = await _accountRepository.GetByRefreshTokenForUpdateAsync(command.RefreshToken, cancellationToken);
         if (account == null || !account.IsActive)
         {
-            return Result.Failure<LoginResponse>("Invalid or expired refresh token");
+            return Result.Failure<LoginResponse>(ResultMessages.Authentication.INVALID_REFRESH_TOKEN);
         }
 
         // 2. Validate refresh token
         if (!account.IsRefreshTokenValid())
         {
-            return Result.Failure<LoginResponse>("Refresh token has expired");
+            Result.Failure<LoginResponse>(ResultMessages.Authentication.REFRESH_TOKEN_EXPIRED);
         }
 
         // 3. Generate new tokens

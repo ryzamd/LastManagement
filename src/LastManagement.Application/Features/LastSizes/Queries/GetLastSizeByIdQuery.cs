@@ -1,3 +1,5 @@
+using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
 using LastManagement.Application.Features.LastSizes.DTOs;
 using LastManagement.Application.Features.LastSizes.Interfaces;
 
@@ -32,7 +34,7 @@ public class GetLastSizeByIdQuery
             UpdatedAt = size.UpdatedAt,
             Links = new Dictionary<string, object>
             {
-                ["self"] = new { href = $"/api/v1/last-sizes/{size.SizeId}" }
+                ["self"] = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastSizes.FULL_BY_ID_TEMPLATE, size.SizeId) }
             }
         };
     }

@@ -1,12 +1,17 @@
 using Asp.Versioning;
 using LastManagement.Api.Constants;
+using LastManagement.Api.Global.Helpers;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.InventoryStocks.Commands;
 using LastManagement.Application.Features.InventoryStocks.DTOs;
 using LastManagement.Application.Features.InventoryStocks.Queries;
 using LastManagement.Application.Features.LastSizes.DTOs;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace LastManagement.Api.Features.InventoryStocks;
 
@@ -67,12 +72,12 @@ public class InventoryStocksController : ControllerBase
         var response = new
         {
             value = items,
-            nextLink = !string.IsNullOrEmpty(nextCursor) ? $"/api/v1/inventory/stocks?limit={limit}&after={nextCursor}" : null,
+            nextLink = !string.IsNullOrEmpty(nextCursor) ? UrlHelper.FormatResourceUrl(ApiRoutes.Inventory.FULL_STOCKS_PAGINATION, limit, nextCursor) : null,
             count = totalCount
         };
 
-        Response.Headers.Append("X-Total-Count", totalCount.ToString());
-        Response.Headers.Append("Cache-Control", "private, max-age=30");
+        Response.Headers.Append(HttpConstants.Headers.X_TOTAL_COUNT, totalCount.ToString());
+        Response.Headers.Append(HttpConstants.Headers.CACHE_CONTROL, CacheConstants.CacheControl.PRIVATE_MAX_AGE_30);
 
         return Ok(response);
     }
@@ -93,17 +98,16 @@ public class InventoryStocksController : ControllerBase
             return NotFound(new
             {
                 Type = ProblemDetailsConstants.Types.NOT_FOUND,
-                title = "Not Found",
-                status = 404,
-                detail = $"Stock with ID {id} not found",
-                instance = $"/api/v1/inventory/stocks/{id}",
-                traceId = HttpContext.TraceIdentifier
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = StringFormatter.FormatMessage(ErrorMessages.Stock.NOT_FOUND, id),
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_BY_ID_TEMPLATE, id),
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
-        var etag = Convert.ToBase64String(
-            System.Text.Encoding.UTF8.GetBytes($"{stock.Version}"));
-        Response.Headers.Append("ETag", etag);
+        var etag = Convert.ToBase64String(Encoding.UTF8.GetBytes(stock.Version.ToString()));
+        Response.Headers.Append(HttpConstants.Headers.ETAG, etag);
 
         return Ok(stock);
     }
@@ -124,36 +128,35 @@ public class InventoryStocksController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
-                status = 400,
-                errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)),
-                instance = $"/api/v1/inventory/stocks/{id}/adjust",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)),
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_ADJUST_TEMPLATE, id),
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
-        if (!Request.Headers.TryGetValue("If-Match", out var ifMatch))
+        if (!Request.Headers.TryGetValue(HttpConstants.Headers.IF_MATCH, out var ifMatch))
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
-                status = 400,
-                detail = "If-Match header is required for stock adjustments",
-                instance = $"/api/v1/inventory/stocks/{id}/adjust",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Detail = ErrorMessages.Stock.IF_MATCH_REQUIRED_FOR_ADJUSTMENT,
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_ADJUST_TEMPLATE, id),
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
         try
         {
-            var adminUser = User.Identity?.Name ?? "system";
+            var adminUser = User.Identity?.Name ?? RoleConstants.SYSTEM;
             var result = await _adjustCommand.ExecuteAsync(id, request, adminUser, cancellationToken);
 
-            var newEtag = Convert.ToBase64String(
-                System.Text.Encoding.UTF8.GetBytes($"{result.Version}"));
-            Response.Headers.Append("ETag", $"\"{newEtag}\"");
+            var newEtag = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.Version.ToString()));
+            Response.Headers.Append(HttpConstants.Headers.ETAG, $"\"{newEtag}\"");
 
             return Ok(result);
         }
@@ -162,36 +165,36 @@ public class InventoryStocksController : ControllerBase
             return NotFound(new
             {
                 Type = ProblemDetailsConstants.Types.NOT_FOUND,
-                title = "Not Found",
-                status = 404,
-                detail = ex.Message,
-                instance = $"/api/v1/inventory/stocks/{id}/adjust",
-                traceId = HttpContext.TraceIdentifier
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = ex.Message,
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_ADJUST_TEMPLATE, id),
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/insufficient-stock",
-                title = "Insufficient Stock",
-                status = 400,
-                detail = ex.Message,
-                instance = $"/api/v1/inventory/stocks/{id}/adjust",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.INSUFFICIENT_STOCK,
+                Title = ProblemDetailsConstants.Titles.INSUFFICIENT_STOCK,
+                Status = 400,
+                Detail = ex.Message,
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_ADJUST_TEMPLATE, id),
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (DbUpdateConcurrencyException)
         {
             return StatusCode(412, new
             {
-                type = "http://localhost:5000/problems/precondition-failed",
-                title = "Precondition Failed",
-                status = 412,
-                detail = "Stock was modified by another user",
-                instance = $"/api/v1/inventory/stocks/{id}/adjust",
-                traceId = HttpContext.TraceIdentifier,
-                providedETag = ifMatch.ToString()
+                Type = ProblemDetailsConstants.Types.PRECONDITION_FAILED,
+                Title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
+                Status = 412,
+                Detail = ErrorMessages.Stock.STOCK_WAS_MODIFIED_BY_ANOTHER,
+                Instance = UrlHelper.FormatInstancePath(ApiRoutes.Inventory.FULL_ADJUST_TEMPLATE, id),
+                TraceId = HttpContext.TraceIdentifier,
+                ProvidedETag = ifMatch.ToString()
             });
         }
     }
@@ -211,18 +214,18 @@ public class InventoryStocksController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
-                status = 400,
-                errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)),
-                instance = "/api/v1/inventory/transfers",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Sitle = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)),
+                Instance = ApiRoutes.InventoryStocks.FULL_TRANSFER,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
         try
         {
-            var adminUser = User.Identity?.Name ?? "system";
+            var adminUser = User.Identity?.Name ?? RoleConstants.SYSTEM;
             var result = await _transferCommand.ExecuteAsync(request, adminUser, cancellationToken);
 
             return Ok(result);
@@ -232,23 +235,23 @@ public class InventoryStocksController : ControllerBase
             return NotFound(new
             {
                 Type = ProblemDetailsConstants.Types.NOT_FOUND,
-                title = "Not Found",
-                status = 404,
-                detail = ex.Message,
-                instance = "/api/v1/inventory/transfers",
-                traceId = HttpContext.TraceIdentifier
+                Title = ProblemDetailsConstants.Titles.NOT_FOUND,
+                Status = 404,
+                Detail = ex.Message,
+                Instance = ApiRoutes.InventoryStocks.FULL_TRANSFER,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
-                status = 400,
-                detail = ex.Message,
-                instance = "/api/v1/inventory/transfers",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Sitle = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Detail = ex.Message,
+                Instance = ApiRoutes.InventoryStocks.FULL_TRANSFER,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
     }
@@ -267,16 +270,16 @@ public class InventoryStocksController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
-                status = 400,
-                errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)),
-                instance = "/api/v1/inventory/adjustments/$batch",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Sitle = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)),
+                Instance = ApiRoutes.InventoryStocks.FULL_ADJUSTMENT_BATCH,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
-        var adminUser = User.Identity?.Name ?? "system";
+        var adminUser = User.Identity?.Name ?? RoleConstants.SYSTEM;
         var result = await _batchAdjustCommand.ExecuteAsync(request, adminUser, cancellationToken);
 
         return StatusCode(207, result);
@@ -318,12 +321,12 @@ public class InventoryStocksController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
-                status = 400,
-                detail = "Threshold must be a positive integer",
-                instance = "/api/v1/inventory/low-stock",
-                traceId = HttpContext.TraceIdentifier
+                Type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                Sitle = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
+                Status = 400,
+                Detail = ErrorMessages.Inventory.THRESHOLD_MUST_BE_POSITIVE_INTEGER,
+                Instance = ApiRoutes.InventoryStocks.FULL_LOW_STOCK,
+                TraceId = HttpContext.TraceIdentifier
             });
         }
 
@@ -374,9 +377,7 @@ public class InventoryStocksController : ControllerBase
         var response = new
         {
             value = items,
-            nextLink = !string.IsNullOrEmpty(nextCursor)
-                ? $"/api/v1/inventory/movements?limit={limit}&after={nextCursor}"
-                : null,
+            nextLink = !string.IsNullOrEmpty(nextCursor) ? UrlHelper.FormatResourceUrl(ApiRoutes.Inventory.FULL_MOVEMENTS_PAGINATION, limit, nextCursor) : null,
             count = totalCount
         };
 

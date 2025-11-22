@@ -1,11 +1,14 @@
 using Asp.Versioning;
 using LastManagement.Api.Constants;
 using LastManagement.Api.Global.Helpers;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.LastNames.Commands;
 using LastManagement.Application.Features.LastNames.DTOs;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastNames.Queries;
 using LastManagement.Domain.LastNames.Enums;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -59,13 +62,13 @@ public class LastNamesController : ControllerBase
                     updatedAt = ln.UpdatedAt,
                     _links = new
                     {
-                        self = new { href = $"/api/v1/last-names/{ln.Id}" },
-                        customer = new { href = $"/api/v1/customers/{ln.CustomerId}" },
-                        models = new { href = $"/api/v1/last-names/{ln.Id}/models" },
-                        inventory = new { href = $"/api/v1/last-names/{ln.Id}/inventory" }
+                        self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, ln.Id) },
+                        customer = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, ln.CustomerId) },
+                        models = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_LAST_WITH_MODELS, ln.Id) },
+                        inventory = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_LAST_WITH_INVENTORY, ln.Id) }
                     }
                 }),
-                _atNextLink = nextId.HasValue ? $"/api/v1/last-names?limit={limit}&after={nextId.Value}" : null,
+                _atNextLink = nextId.HasValue ? UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_PAGINATION_TEMPLATE, limit, nextId.Value) : null,
                 _atCount = totalCount
             };
 
@@ -75,11 +78,11 @@ public class LastNamesController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
+                type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 status = 400,
                 detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -102,17 +105,17 @@ public class LastNamesController : ControllerBase
             return NotFound(new
             {
                 Type = ProblemDetailsConstants.Types.NOT_FOUND,
-                title = "Not Found",
+                title = ProblemDetailsConstants.Titles.NOT_FOUND,
                 status = 404,
-                detail = $"Last name with ID {id} not found",
-                instance = HttpContext.Request.Path.ToString(),
+                detail = StringFormatter.FormatMessage(ErrorMessages.LastName.NOT_FOUND, id),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
 
         var etag = ETagHelper.Generate(lastName.Version);
-        Response.Headers["ETag"] = etag;
-        Response.Headers["Cache-Control"] = "private, max-age=60";
+        Response.Headers[HttpConstants.Headers.ETAG] = etag;
+        Response.Headers.Append(HttpConstants.Headers.CACHE_CONTROL, CacheConstants.CacheControl.PRIVATE_MAX_AGE_30);
 
         return Ok(new
         {
@@ -125,10 +128,10 @@ public class LastNamesController : ControllerBase
             updatedAt = lastName.UpdatedAt,
             _links = new
             {
-                self = new { href = $"/api/v1/last-names/{lastName.Id}" },
-                customer = new { href = $"/api/v1/customers/{lastName.CustomerId}" },
-                models = new { href = $"/api/v1/last-names/{lastName.Id}/models" },
-                inventory = new { href = $"/api/v1/last-names/{lastName.Id}/inventory" }
+                self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, lastName.Id) },
+                customer = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, lastName.CustomerId) },
+                models = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_LAST_WITH_MODELS, lastName.Id) },
+                inventory = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_LAST_WITH_INVENTORY, lastName.Id) }
             }
         });
     }
@@ -157,20 +160,18 @@ public class LastNamesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "http://localhost:5000/problems/validation-error",
-                    title = "Validation Error",
+                    type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                    title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                     status = 400,
-                    errors,
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = errors,
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
 
             var lastName = await command.ExecuteAsync(request, cancellationToken);
 
-            return CreatedAtAction(
-                nameof(GetLastNameById),
-                new { id = lastName.LastId },
+            return CreatedAtAction(nameof(GetLastNameById), new { id = lastName.LastId },
                 new
                 {
                     id = lastName.LastId,
@@ -181,8 +182,8 @@ public class LastNamesController : ControllerBase
                     updatedAt = lastName.UpdatedAt,
                     _links = new
                     {
-                        self = new { href = $"/api/v1/last-names/{lastName.LastId}" },
-                        customer = new { href = $"/api/v1/customers/{lastName.CustomerId}" }
+                        self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, lastName.LastId) },
+                        customer = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, lastName.CustomerId) }
                     }
                 });
         }
@@ -194,9 +195,9 @@ public class LastNamesController : ControllerBase
                 Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier,
-                conflictReason = "duplicate-last-code"
+                conflictReason = ConflictMessages.Reasons.DUPLICATE_LAST_CODE,
             });
         }
         catch (Exception ex)
@@ -204,11 +205,11 @@ public class LastNamesController : ControllerBase
             _logger.LogError(ex, "Error creating last name");
             return StatusCode(500, new
             {
-                type = "http://localhost:5000/problems/internal-error",
-                title = "Internal Server Error",
+                type = ProblemDetailsConstants.Types.INTERNAL_ERROR,
+                title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                 status = 500,
-                detail = "An error occurred while creating the last name",
-                instance = HttpContext.Request.Path.ToString(),
+                detail = ProblemDetailsConstants.Details.CREATE_LAST_NAME_ERROR,
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -230,15 +231,15 @@ public class LastNamesController : ControllerBase
         try
         {
             // Check If-Match header
-            if (!Request.Headers.TryGetValue("If-Match", out var ifMatchHeader) || string.IsNullOrWhiteSpace(ifMatchHeader))
+            if (!Request.Headers.TryGetValue(HttpConstants.Headers.IF_MATCH, out var ifMatchHeader) || string.IsNullOrWhiteSpace(ifMatchHeader))
             {
                 return StatusCode(428, new
                 {
-                    type = "http://localhost:5000/problems/precondition-required",
-                    title = "Precondition Required",
+                    type = ProblemDetailsConstants.Types.PRECONDITION_REQUIRED,
+                    title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
                     status = 428,
-                    detail = "If-Match header is required for updates",
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = ProblemDetailsConstants.Details.IF_MATCH_REQUIRED_FOR_UPDATES,
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -254,11 +255,11 @@ public class LastNamesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "http://localhost:5000/problems/validation-error",
-                    title = "Validation Error",
+                    type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                    title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                     status = 400,
-                    errors,
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = errors,
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -270,10 +271,10 @@ public class LastNamesController : ControllerBase
                 return NotFound(new
                 {
                     Type = ProblemDetailsConstants.Types.NOT_FOUND,
-                    title = "Not Found",
+                    title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     status = 404,
-                    detail = $"Last name with ID {id} not found",
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = StringFormatter.FormatMessage(ErrorMessages.LastName.NOT_FOUND, id),
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -286,11 +287,11 @@ public class LastNamesController : ControllerBase
             {
                 return StatusCode(412, new
                 {
-                    type = "http://localhost:5000/problems/precondition-failed",
-                    title = "Precondition Failed",
+                    type = ProblemDetailsConstants.Types.PRECONDITION_FAILED,
+                    title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
                     status = 412,
-                    detail = "ETag mismatch. Resource was modified.",
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = ProblemDetailsConstants.Details.ETAG_MISMATCH,
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier,
                     providedETag = providedETag,
                     currentETag = currentETag
@@ -301,7 +302,7 @@ public class LastNamesController : ControllerBase
             if (!string.IsNullOrWhiteSpace(request.LastCode) && request.LastCode != lastName.LastCode)
             {
                 if (await repository.ExistsByCodeAsync(request.LastCode, id, cancellationToken))
-                    throw new InvalidOperationException($"Last code '{request.LastCode}' already exists");
+                    throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.LastName.ALREADY_EXISTS, request.LastCode, RoleConstants.CUSTOMER));
 
                 lastName.UpdateLastCode(request.LastCode);
             }
@@ -309,7 +310,7 @@ public class LastNamesController : ControllerBase
             if (!string.IsNullOrWhiteSpace(request.Status))
             {
                 if (!Enum.TryParse<LastNameStatus>(request.Status, true, out var newStatus))
-                    throw new ArgumentException($"Invalid status value: {request.Status}");
+                    throw new ArgumentException(StringFormatter.FormatMessage(ErrorMessages.LastName.INVALID_STATUS, request.Status));
 
                 lastName.UpdateStatus(newStatus, request.DiscontinueReason);
             }
@@ -324,7 +325,7 @@ public class LastNamesController : ControllerBase
 
             // Return updated entity with new ETag
             var newETag = ETagHelper.Generate(lastName.Version);
-            Response.Headers["ETag"] = newETag;
+            Response.Headers[HttpConstants.Headers.ETAG] = newETag;
 
             return Ok(new
             {
@@ -336,7 +337,7 @@ public class LastNamesController : ControllerBase
                 updatedAt = lastName.UpdatedAt,
                 _links = new
                 {
-                    self = new { href = $"/api/v1/last-names/{lastName.LastId}" }
+                    self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, lastName.LastId) }
                 }
             });
         }
@@ -344,11 +345,11 @@ public class LastNamesController : ControllerBase
         {
             return StatusCode(412, new
             {
-                type = "http://localhost:5000/problems/precondition-failed",
-                title = "Precondition Failed",
+                type = ProblemDetailsConstants.Types.PRECONDITION_FAILED,
+                title = ProblemDetailsConstants.Titles.PRECONDITION_FAILED,
                 status = 412,
-                detail = "The resource was modified by another request. Please refresh and retry.",
-                instance = HttpContext.Request.Path.ToString(),
+                detail = ErrorMessages.LastName.RESOURCE_WAS_MODIFIED_BY_ANOTHER_REQUEST,
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -360,20 +361,20 @@ public class LastNamesController : ControllerBase
                 Title = ProblemDetailsConstants.Titles.CONFLICT,
                 status = 409,
                 detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier,
-                conflictReason = "duplicate-last-code"
+                conflictReason = ConflictMessages.Reasons.DUPLICATE_LAST_CODE,
             });
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
+                type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 status = 400,
                 detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -399,10 +400,10 @@ public class LastNamesController : ControllerBase
                 return NotFound(new
                 {
                     Type = ProblemDetailsConstants.Types.NOT_FOUND,
-                    title = "Not Found",
+                    title = ProblemDetailsConstants.Titles.NOT_FOUND,
                     status = 404,
-                    detail = $"Last name with ID {id} not found",
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = StringFormatter.FormatMessage(ErrorMessages.LastName.NOT_FOUND, id),
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -419,10 +420,10 @@ public class LastNamesController : ControllerBase
                     Type = ProblemDetailsConstants.Types.CONFLICT,
                     Title = ProblemDetailsConstants.Titles.CONFLICT,
                     status = 409,
-                    detail = "Cannot delete last name because it has associated records",
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = ErrorMessages.LastName.CANNOT_DELETE_LAST_NAME_HAS_ASSOCIATED_RECORDS,
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier,
-                    conflictReason = "has-dependencies",
+                    conflictReason = ConflictMessages.Reasons.HAS_DEPENDENCIES,
                     relatedResources = new
                     {
                         hasModels,
@@ -431,8 +432,8 @@ public class LastNamesController : ControllerBase
                     },
                     suggestions = new[]
                     {
-                        "Delete or reassign all associated records before deleting the last name",
-                        "Change last name status to 'Obsolete' instead using PATCH"
+                        ConflictMessages.Suggestions.DELETE_REASSIGN_RECORDS,
+                        ConflictMessages.Suggestions.CHANGE_STATUS_OBSOLETE
                     }
                 });
             }
@@ -453,11 +454,11 @@ public class LastNamesController : ControllerBase
             _logger.LogError(ex, "Error deleting last name {LastId}", id);
             return StatusCode(500, new
             {
-                type = "http://localhost:5000/problems/internal-error",
-                title = "Internal Server Error",
+                type = ProblemDetailsConstants.Types.INTERNAL_ERROR,
+                title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                 status = 500,
-                detail = "An error occurred while deleting the last name",
-                instance = HttpContext.Request.Path.ToString(),
+                detail = ErrorMessages.LastName.DELETE_LAST_NAME_ERROR,
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -487,11 +488,11 @@ public class LastNamesController : ControllerBase
 
                 return BadRequest(new
                 {
-                    type = "http://localhost:5000/problems/validation-error",
-                    title = "Validation Error",
+                    type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                    title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                     status = 400,
-                    errors,
-                    instance = HttpContext.Request.Path.ToString(),
+                    detail = errors,
+                    instance = HttpContext.Request.Path,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -510,11 +511,11 @@ public class LastNamesController : ControllerBase
             _logger.LogError(ex, "Error processing batch update");
             return StatusCode(500, new
             {
-                type = "http://localhost:5000/problems/internal-error",
-                title = "Internal Server Error",
+                type = ProblemDetailsConstants.Types.INTERNAL_ERROR,
+                title = ProblemDetailsConstants.Titles.INTERNAL_SERVER_ERROR,
                 status = 500,
-                detail = "An error occurred while processing the batch update",
-                instance = HttpContext.Request.Path.ToString(),
+                detail = ErrorMessages.LastName.BATCH_UPDATE_LAST_NAME_ERROR,
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -546,11 +547,11 @@ public class LastNamesController : ControllerBase
                     createdAt = ln.CreatedAt,
                     _links = new
                     {
-                        self = new { href = $"/api/v1/last-names/{ln.Id}" },
-                        customer = new { href = $"/api/v1/customers/{ln.CustomerId}" }
+                        self = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.FULL_BY_ID_TEMPLATE, ln.Id) },
+                        customer = new { href = UrlHelper.FormatResourceUrl(ApiRoutes.Customers.FULL_BY_ID_TEMPLATE, ln.CustomerId) }
                     }
                 }),
-                _atNextLink = nextId.HasValue ? $"/api/v1/customers/{customerId}/lasts?limit={limit}&after={nextId.Value}" : null,
+                _atNextLink = nextId.HasValue ? UrlHelper.FormatResourceUrl(ApiRoutes.LastNames.BY_CUSTOMER_WITH_PAGINATION, customerId, limit, nextId.Value) : null,
                 _atCount = totalCount
             };
 
@@ -560,11 +561,11 @@ public class LastNamesController : ControllerBase
         {
             return BadRequest(new
             {
-                type = "http://localhost:5000/problems/validation-error",
-                title = "Validation Error",
+                type = ProblemDetailsConstants.Types.VALIDATION_ERROR,
+                title = ProblemDetailsConstants.Titles.VALIDATION_ERROR,
                 status = 400,
                 detail = ex.Message,
-                instance = HttpContext.Request.Path.ToString(),
+                instance = HttpContext.Request.Path,
                 traceId = HttpContext.TraceIdentifier
             });
         }

@@ -1,4 +1,5 @@
 using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 
 namespace LastManagement.Domain.PurchaseOrders.Entities;
 
@@ -18,28 +19,24 @@ public sealed class PurchaseOrderItem : Entity
     public static PurchaseOrderItem Create(int orderId, int lastId, int sizeId, int quantityRequested)
     {
         if (orderId <= 0)
-            throw new ArgumentException("Order ID must be positive", nameof(orderId));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrderItem.ORDER_ID_POSITIVE, nameof(orderId));
 
         if (lastId <= 0)
-            throw new ArgumentException("Last ID must be positive", nameof(lastId));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrderItem.LAST_ID_POSITIVE, nameof(lastId));
 
         if (sizeId <= 0)
-            throw new ArgumentException("Size ID must be positive", nameof(sizeId));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrderItem.SIZE_ID_POSITIVE, nameof(sizeId));
 
         if (quantityRequested <= 0)
-            throw new ArgumentException("Quantity must be positive", nameof(quantityRequested));
+            throw new ArgumentException(DomainValidationMessages.PurchaseOrderItem.QUANTITY_POSITIVE, nameof(quantityRequested));
 
         return new PurchaseOrderItem
         {
             OrderId = orderId,
             LastId = lastId,
             SizeId = sizeId,
-            QuantityRequested = quantityRequested
+            QuantityRequested = quantityRequested,
+            CreatedAt = DateTime.UtcNow
         };
     }
-
-    //public override void IncrementVersion()
-    //{
-    //    // Items don't have independent versioning
-    //}
 }

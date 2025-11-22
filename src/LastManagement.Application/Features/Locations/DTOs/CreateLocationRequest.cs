@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using LastManagement.Application.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace LastManagement.Application.Features.Locations.DTOs;
 
@@ -14,7 +14,6 @@ public sealed record CreateLocationRequest
     public string LocationName { get; init; } = string.Empty;
 
     [Required(ErrorMessage = ValidationMessages.Location.TYPE_REQUIRED)]
-    [RegularExpression("^(Production|Development|Quality|Storage)$",
-        ErrorMessage = ValidationMessages.Location.TYPE_INVALID)]
-    public string LocationType { get; init; } = "Production";
+    [RegularExpression(FormatConstants.RegexPatterns.LOCATION_TYPE, ErrorMessage = ValidationMessages.Location.TYPE_INVALID)]
+    public string LocationType { get; init; } = StatusConstants.LocationType.PRODUCTION;
 }

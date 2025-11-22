@@ -1,13 +1,17 @@
 namespace LastManagement.Domain.Constants;
 
-/// <summary>
-/// Contains movement type string constants
-/// </summary>
 public static class MovementTypeConstants
 {
     public const string PURCHASE = "Purchase";
-    public const string ADJUSTMENT = "Adjustment";
+    public const string ADJUSTMENT = "Adjust";
     public const string TRANSFER = "Transfer";
     public const string SALE = "Sale";
     public const string RETURN = "Return";
+    public const string DAMAGE = "Damage";
+    public const string REPAIR = "Repair";
+}
+
+public static class MovementReasonConstants
+{
+    public const string PURCHASE_ORDER = "Purchase Order";
 }

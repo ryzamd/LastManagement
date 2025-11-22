@@ -1,4 +1,5 @@
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Authentication.DTOs;
 using LastManagement.Application.Features.Authentication.Interfaces;
 
@@ -20,7 +21,7 @@ public sealed class GetCurrentUserQueryHandler
         var account = await _accountRepository.GetByIdAsync(query.UserId, cancellationToken);
         if (account == null || !account.IsActive)
         {
-            return Result.Failure<UserDto>("User not found");
+            return Result.Failure<UserDto>(ErrorMessages.Account.USER_NOT_FOUND);
         }
 
         var userDto = new UserDto

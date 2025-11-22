@@ -1,5 +1,6 @@
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Customers.Interfaces;
 
 namespace LastManagement.Application.Features.Customers.Commands;
@@ -24,13 +25,13 @@ public sealed class DeleteCustomerCommandHandler
         var customer = await _customerRepository.GetByIdForUpdateAsync(command.Id, cancellationToken);
         if (customer == null)
         {
-            return Result.Failure("Customer not found");
+            return Result.Failure(ErrorMessages.Account.CUSTOMER_NOT_FOUND);
         }
 
         // Check if has associated lasts
         if (await _customerRepository.HasAssociatedLastsAsync(command.Id, cancellationToken))
         {
-            return Result.Failure("Cannot delete customer because it has associated lasts");
+            return Result.Failure(ErrorMessages.Account.CANNOT_DELETE_CUSTOMER_HAS_LASTS);
         }
 
         _customerRepository.Delete(customer);

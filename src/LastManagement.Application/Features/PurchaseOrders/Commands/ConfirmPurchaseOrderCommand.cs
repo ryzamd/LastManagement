@@ -1,4 +1,5 @@
 using LastManagement.Application.Common.Interfaces;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.InventoryStocks.Interfaces;
 using LastManagement.Application.Features.LastNames.Interfaces;
 using LastManagement.Application.Features.LastSizes.Interfaces;
@@ -6,6 +7,7 @@ using LastManagement.Application.Features.Locations.Interfaces;
 using LastManagement.Application.Features.PurchaseOrders.DTOs;
 using LastManagement.Application.Features.PurchaseOrders.Interfaces;
 using LastManagement.Domain.InventoryStocks;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.PurchaseOrders.Commands;
 
@@ -50,7 +52,7 @@ public sealed class ConfirmPurchaseOrderCommand
             var order = await _orderRepository.GetByIdWithItemsAsync(orderId, cancellationToken);
             if (order == null)
             {
-                throw new InvalidOperationException($"Purchase order with ID {orderId} not found");
+                throw new InvalidOperationException(StringFormatter.FormatMessage(ErrorMessages.PurchaseOrder.NOT_FOUND, orderId));
             }
 
             // Confirm order (validates status is Pending)

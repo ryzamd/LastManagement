@@ -1,6 +1,7 @@
 using LastManagement.Application.Features.LastModels.Interfaces;
 using LastManagement.Domain.LastModels.Entities;
 using LastManagement.Domain.LastModels.Enums;
+using LastManagement.Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace LastManagement.Infrastructure.Persistence.Repositories;
@@ -27,10 +28,10 @@ public class LastModelRepository : ILastModelRepository
         // Apply ordering
         query = orderBy?.ToLower() switch
         {
-            "modelcode" or "modelcode asc" => query.OrderBy(lm => lm.ModelCode),
-            "modelcode desc" => query.OrderByDescending(lm => lm.ModelCode),
-            "createdat" or "createdat asc" => query.OrderBy(lm => lm.CreatedAt),
-            "createdat desc" => query.OrderByDescending(lm => lm.CreatedAt),
+            RepositoryConstants.SortFields.MODEL_CODE or RepositoryConstants.SortFields.MODEL_CODE_ASC => query.OrderBy(lm => lm.ModelCode),
+            RepositoryConstants.SortFields.MODEL_CODE_DESC => query.OrderByDescending(lm => lm.ModelCode),
+            RepositoryConstants.SortFields.CREATED_AT or RepositoryConstants.SortFields.CREATED_AT_ASC => query.OrderBy(lm => lm.CreatedAt),
+            RepositoryConstants.SortFields.CREATED_AT_DESC => query.OrderByDescending(lm => lm.CreatedAt),
             _ => query.OrderBy(lm => lm.LastId).ThenBy(lm => lm.ModelCode)
         };
 

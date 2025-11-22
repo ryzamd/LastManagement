@@ -1,4 +1,5 @@
 ﻿using LastManagement.Domain.Common;
+using LastManagement.Domain.Constants;
 
 namespace LastManagement.Domain.InventoryStocks;
 
@@ -21,7 +22,7 @@ public class InventoryMovement : Entity
     public static InventoryMovement Create(int lastId, int sizeId, int? fromLocationId, int? toLocationId, string movementType, int quantity, string? reason, string? referenceNumber, string? createdBy)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Quantity must be positive", nameof(quantity));
+            throw new ArgumentException(DomainValidationMessages.InventoryStock.QUANTITY_POSITIVE, nameof(quantity));
 
         return new InventoryMovement
         {
@@ -45,9 +46,9 @@ public class InventoryMovement : Entity
             sizeId,
             fromLocationId: null,
             toLocationId: toLocationId,
-            movementType: "Purchase",
+            movementType: MovementTypeConstants.PURCHASE,
             quantity: quantity,
-            reason: "Purchase Order",
+            reason: MovementReasonConstants.PURCHASE_ORDER,
             referenceNumber: referenceNumber,
             createdBy: createdBy
         );

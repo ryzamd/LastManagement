@@ -1,5 +1,6 @@
 using LastManagement.Application.Common.Interfaces;
 using LastManagement.Application.Common.Models;
+using LastManagement.Application.Constants;
 using LastManagement.Application.Features.Locations.Interfaces;
 
 namespace LastManagement.Application.Features.Locations.Commands;
@@ -22,12 +23,12 @@ public sealed class DeleteLocationCommandHandler
         var location = await _locationRepository.GetByIdForUpdateAsync(command.Id, cancellationToken);
         if (location == null)
         {
-            return Result.Failure("Location not found");
+            return Result.Failure(ErrorMessages.Location.NOT_FOUND);
         }
 
         if (await _locationRepository.HasInventoryAsync(command.Id, cancellationToken))
         {
-            return Result.Failure("Cannot delete location because it has inventory");
+            return Result.Failure(ErrorMessages.Location.CANNOT_DELETE_HAS_INVENTORY);
         }
 
         _locationRepository.Delete(location);

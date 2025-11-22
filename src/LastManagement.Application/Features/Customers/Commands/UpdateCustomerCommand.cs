@@ -3,6 +3,8 @@ using LastManagement.Application.Common.Models;
 using LastManagement.Application.Features.Customers.DTOs;
 using LastManagement.Application.Features.Customers.Interfaces;
 using LastManagement.Domain.Customers;
+using LastManagement.Utilities.Constants.Global;
+using LastManagement.Utilities.Helpers;
 
 namespace LastManagement.Application.Features.Customers.Commands;
 
@@ -30,13 +32,13 @@ public sealed class UpdateCustomerCommandHandler
         var customer = await _customerRepository.GetByIdForUpdateAsync(command.Id, cancellationToken);
         if (customer == null)
         {
-            return Result.Failure<CustomerDto>("Customer not found");
+            return Result.Failure<CustomerDto>(ResultMessages.Customer.NOT_FOUND);
         }
 
         // Check version for concurrency
         if (customer.Version != command.ExpectedVersion)
         {
-            return Result.Failure<CustomerDto>("Customer was modified by another user");
+            return Result.Failure<CustomerDto>(ResultMessages.Customer.MODIFIED_BY_ANOTHER);
         }
 
         // Update name if provided
@@ -45,7 +47,7 @@ public sealed class UpdateCustomerCommandHandler
             // Check duplicate
             if (await _customerRepository.ExistsByNameAsync(command.CustomerName, customer.Id, cancellationToken))
             {
-                return Result.Failure<CustomerDto>($"Customer with name '{command.CustomerName}' already exists");
+                return Result.Failure<CustomerDto>(StringFormatter.FormatValidation(ResultMessages.Customer.CUSTOMER_ALREADY_EXISTS, command.CustomerName));
             }
             customer.UpdateName(command.CustomerName);
         }
@@ -55,7 +57,7 @@ public sealed class UpdateCustomerCommandHandler
         {
             if (!Enum.TryParse<CustomerStatus>(command.Status, out var newStatus))
             {
-                return Result.Failure<CustomerDto>("Invalid status value");
+                return Result.Failure<CustomerDto>(ResultMessages.Customer.INVALID_STATUS);
             }
             customer.UpdateStatus(newStatus);
         }
